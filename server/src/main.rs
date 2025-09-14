@@ -3,6 +3,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use axum::serve::ListenerExt;
 pub use bytes::Bytes;
 use candle_core::{DType, Device};
 use clap::Parser;
@@ -73,8 +74,13 @@ async fn main() -> anyhow::Result<()> {
 
     // Run server
     let addr = format!("0.0.0.0:{}", args.port);
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).tcp_nodelay(true).await?;
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap()
+    .tap_io(|tcp_stream| {
+        if let Err(err) = tcp_stream.set_nodelay(true) {
+            tracing::trace!("failed to set TCP_NODELAY on incoming connection: {err:#}");
+        }
+    });
+    axum::serve(listener, app).await?;
 
     Ok(())
 }

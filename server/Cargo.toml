@@ -25,9 +25,9 @@ mimi = ["dep:moshi"]
 
 
 [dependencies]
-anyhow = "1.0.86"
-async-stream = "0.3.6"
-axum = { version = "0.7.7", features = ["multipart"] }
+anyhow = "1"
+async-stream = "0.3"
+axum = { version = "0.8", features = ["multipart"] }
 byteorder = "1.5.0"
 bytes = "1.8.0"
 candle-core = { workspace = true }
@@ -35,30 +35,30 @@ candle-flash-attn = { workspace = true, optional = true }
 candle-nn = { workspace = true }
 candle-transformers = { workspace = true }
 clap = { version = "4.5.16", features = ["derive"] }
-futures = "0.3.31"
-futures-util = "0.3.31"
+futures = "0.3"
+futures-util = "0.3"
 hf-hub = "0.4.1"
 indicatif = "0.17.8"
 moshi = { version = "0.5.2", optional = true }
-num = "0.4.3"
-num-traits = "0.2.19"
+num = "0.4"
+num-traits = "0.2"
 ogg = { version = "0.9.1", features = ["tokio-util", "async"] }
 opus2 = "0.3"
-rand = "0.8.5"
-regex = "1.10.6"
-rustfft = "6.2.0"
-serde = { version = "1.0.208", features = ["derive"] }
-serde_json = "1.0.127"
-symphonia = "0.5.4"
-tempfile = "3.14.0"
-thiserror = "1.0.63"
+rand = "0.8"
+regex = "1.10"
+rustfft = "6.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+symphonia = "0.5"
+tempfile = "3"
+thiserror = "1"
 tokenizers = { workspace = true }
-tokio = { version = "1.41.1", features = ["full"] }
-tokio-util = "0.7.12"
-tower = "0.5.1"
-tower-http = { version = "0.6.2", features = ["cors"] }
-tracing = "0.1.40"
-zip = { version = "5.1" }
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors"] }
+tracing = "0.1"
+zip = { version = "5" }
 
 [dependencies.fish_speech_core]
 path = "../fish_speech_core"

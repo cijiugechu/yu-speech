@@ -1,15 +1,15 @@
-use candle_core::{DType, Device, Tensor, D};
+use candle_core::{D, DType, Device, Tensor};
 use candle_nn::VarBuilder;
 use fish_speech_core::config::{WhichLM, WhichModel};
 use fish_speech_core::lm::generate::generate_blocking;
-use fish_speech_core::lm::{dual_ar::TokenConfig, BaseModelArgs, DualARTransformer};
+use fish_speech_core::lm::{BaseModelArgs, DualARTransformer, dual_ar::TokenConfig};
 use fish_speech_core::text::prompt::PromptEncoder;
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use tokenizers::Tokenizer;
 
-use super::utils::{get_device, get_version, wrap_err, PyRes};
+use super::utils::{PyRes, get_device, get_version, wrap_err};
 
 #[pyclass]
 pub struct LM {
@@ -34,7 +34,7 @@ impl LM {
                 return Err(PyException::new_err(format!(
                     "Unsupported dtype on device {}: {}",
                     device, d
-                )))
+                )));
             }
         };
         let device = get_device(device)?;

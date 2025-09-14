@@ -2,7 +2,7 @@ pub mod load;
 
 use candle_core::{Device, Tensor};
 use fish_speech_core::config::WhichLM;
-use fish_speech_core::text::prompt::{load_prompt_text, PromptEncoder};
+use fish_speech_core::text::prompt::{PromptEncoder, load_prompt_text};
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::path::Path;

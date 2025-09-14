@@ -1,9 +1,9 @@
+use axum::serve::ListenerExt;
 use axum::{
+    Router,
     extract::DefaultBodyLimit,
     routing::{get, post},
-    Router,
 };
-use axum::serve::ListenerExt;
 pub use bytes::Bytes;
 use candle_core::{DType, Device};
 use clap::Parser;
@@ -12,7 +12,7 @@ use server::handlers::{
     encode_speech::encode_speaker, speech::generate_speech, supported_voices::get_supported_voices,
 };
 use server::state::AppState;
-use server::utils::load::{load_codec, load_lm, Args};
+use server::utils::load::{Args, load_codec, load_lm};
 use std::sync::Arc;
 use std::time::Instant;
 // Re-export the key types
@@ -25,7 +25,9 @@ async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     let _ = tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
         .with_writer(std::io::stdout)
         .try_init();
 
@@ -81,12 +83,14 @@ async fn main() -> anyhow::Result<()> {
 
     // Run server
     let addr = format!("0.0.0.0:{}", args.port);
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap()
-    .tap_io(|tcp_stream| {
-        if let Err(err) = tcp_stream.set_nodelay(true) {
-            tracing::trace!("failed to set TCP_NODELAY on incoming connection: {err:#}");
-        }
-    });
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .unwrap()
+        .tap_io(|tcp_stream| {
+            if let Err(err) = tcp_stream.set_nodelay(true) {
+                tracing::trace!("failed to set TCP_NODELAY on incoming connection: {err:#}");
+            }
+        });
     axum::serve(listener, app).await?;
 
     Ok(())

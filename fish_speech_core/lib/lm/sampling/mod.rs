@@ -1,7 +1,7 @@
 pub mod rep_pen;
-use candle_core::{DType, Result, Tensor, D};
+use candle_core::{D, DType, Result, Tensor};
 use candle_nn::ops::softmax_last_dim;
-use rand::{distributions::Distribution, Rng, SeedableRng};
+use rand::{Rng, SeedableRng, distributions::Distribution};
 use rayon::prelude::*;
 
 /// Extremely stripped-down CPU softmax for slow model out

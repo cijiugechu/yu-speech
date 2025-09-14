@@ -1,15 +1,15 @@
 use anyhow::Error;
-use candle_core::{DType, Device, IndexOp, Result, Tensor, D};
+use candle_core::{D, DType, Device, IndexOp, Result, Tensor};
 use candle_nn::VarBuilder;
 use clap::Parser;
 use fish_speech_core::config::{WhichFishVersion, WhichLM, WhichModel};
 use fish_speech_core::lm::generate::generate_blocking;
 use fish_speech_core::lm::sampling::SamplingArgs;
 use fish_speech_core::lm::{
-    dual_ar::{BaseModelArgs, TokenConfig},
     DualARTransformer,
+    dual_ar::{BaseModelArgs, TokenConfig},
 };
-use fish_speech_core::text::prompt::{load_prompt_text, PromptEncoder};
+use fish_speech_core::text::prompt::{PromptEncoder, load_prompt_text};
 use std::path::PathBuf;
 use tokenizers::Tokenizer;
 

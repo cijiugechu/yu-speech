@@ -1,5 +1,5 @@
 #![allow(unused)]
-use candle_core::{bail, DType, Device, Result, Tensor};
+use candle_core::{DType, Device, Result, Tensor, bail};
 use candle_nn::VarBuilder;
 
 #[cfg(feature = "mimi")]

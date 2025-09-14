@@ -1,6 +1,7 @@
-use candle_core::{bail, CustomOp1, Layout, Result, Tensor};
+use candle_core::{CustomOp1, Layout, Result, Tensor, bail};
 
 #[derive(Debug, Clone)]
+#[allow(unused)]
 pub struct RepeatKV {
     n_rep: usize,
 }
@@ -36,7 +37,7 @@ impl CustomOp1 for RepeatKV {
         use candle_core::cuda_backend::cudarc::driver::{
             CudaSlice, DeviceRepr, LaunchAsync, LaunchConfig,
         };
-        use candle_core::cuda_backend::{kernel_name, Map1, WrapErr};
+        use candle_core::cuda_backend::{Map1, WrapErr, kernel_name};
         use candle_core::{CudaDevice, WithDType};
 
         struct S {
@@ -79,7 +80,9 @@ impl CustomOp1 for RepeatKV {
 
         let (bsz, n_local_heads, seqlen, head_dim) = l1.shape().dims4()?;
         if bsz != 1 {
-            bail!("Only implemented for single batch. Repeat_interleave will be almost as fast at higher bsz");
+            bail!(
+                "Only implemented for single batch. Repeat_interleave will be almost as fast at higher bsz"
+            );
         }
 
         let dev = s1.device();
@@ -99,6 +102,7 @@ impl CustomOp1 for RepeatKV {
     }
 }
 
+#[allow(unused)]
 pub fn repeat_kv(xs: &Tensor, n_rep: usize) -> Result<Tensor> {
     if !xs.is_contiguous() {
         bail!("Input must be contiguous");

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use candle_core::{DType, Device, D};
+use candle_core::{D, DType, Device};
 use candle_nn::VarBuilder;
 use clap::{Parser, ValueHint};
 use fish_speech_core::audio as torchaudio;

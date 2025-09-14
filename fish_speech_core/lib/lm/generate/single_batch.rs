@@ -1,10 +1,10 @@
 use super::utils::{constrain_probs_to_audio, rescale_semantic_tokens};
 use crate::config::{WhichFishVersion, WhichLM};
-use crate::lm::sampling::{
-    legacy_softmax_sample, rep_pen::SingleBatchedRepPenProcessor, SamplingArgs,
-};
 use crate::lm::DualARTransformer;
-use candle_core::{DType, IndexOp, Module, Result, Tensor, D};
+use crate::lm::sampling::{
+    SamplingArgs, legacy_softmax_sample, rep_pen::SingleBatchedRepPenProcessor,
+};
+use candle_core::{D, DType, IndexOp, Module, Result, Tensor};
 use candle_transformers::generation::{LogitsProcessor, Sampling};
 use indicatif::{ProgressBar, ProgressStyle};
 use std::time::{Duration, Instant};

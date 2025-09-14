@@ -1,6 +1,6 @@
 use crate::config::{WhichFishVersion, WhichLM};
 use crate::lm::dual_ar::TokenConfig;
-use candle_core::{IndexOp, Result, Tensor, D};
+use candle_core::{D, IndexOp, Result, Tensor};
 
 /// Constrains Fish 1.5+ models to <|im_end|> plus <|semantic:n|> range, leaves others untouched
 pub fn constrain_probs_to_audio(

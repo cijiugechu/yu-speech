@@ -5,7 +5,7 @@ use axum::{
     http::StatusCode,
     response::Response,
 };
-use candle_core::{Tensor, D};
+use candle_core::{D, Tensor};
 use fish_speech_core::audio as torchaudio;
 use fish_speech_core::audio::functional;
 use fish_speech_core::text::prompt::PromptEncoder;
@@ -71,7 +71,10 @@ pub async fn encode_speaker(
             state.lm.model_type,
         );
         if speaker_map.contains_key(id) {
-            return Err(AppError::Message(format!("ID already exists on server: {}", id)));
+            return Err(AppError::Message(format!(
+                "ID already exists on server: {}",
+                id
+            )));
         }
         let new_prompt = prompt_encoder
             .encode_conditioning_prompt(prompt, &result.to_dtype(candle_core::DType::U32)?)?;

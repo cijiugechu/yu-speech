@@ -1,9 +1,9 @@
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 use candle_core::{DType, Device};
 use clap::Parser;
-use server::handlers::speech::{generate_speech, GenerateRequest};
+use server::handlers::speech::{GenerateRequest, generate_speech};
 use server::state::AppState;
-use server::utils::load::{load_codec, load_lm, Args};
+use server::utils::load::{Args, load_codec, load_lm};
 use std::sync::Arc;
 use std::time::Instant;
 use tracing::info;
@@ -11,7 +11,9 @@ use tracing_subscriber::EnvFilter;
 
 async fn run_speech_test() -> anyhow::Result<()> {
     let _ = tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
         .with_writer(std::io::stdout)
         .try_init();
     let args = Args::parse();

@@ -1,6 +1,6 @@
 use super::error::AppError;
 use crate::state::AppState;
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 use std::sync::Arc;
 
 pub async fn get_supported_voices(

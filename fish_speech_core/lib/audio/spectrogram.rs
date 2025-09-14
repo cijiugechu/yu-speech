@@ -1,6 +1,6 @@
 use super::stft::Spectrogram;
 use byteorder::{ByteOrder, LittleEndian};
-use candle_core::{Result as CandleResult, Tensor, D};
+use candle_core::{D, Result as CandleResult, Tensor};
 use num::complex::Complex;
 
 fn complex_to_magnitude(spec: Vec<Complex<f64>>, num_freq_bins: usize) -> Vec<f32> {
@@ -80,7 +80,11 @@ fn linear_spectrogram(samples: &Tensor, fft_size: usize, hop_size: usize) -> Can
         (num_frames, num_freq_bins),
         samples.device(),
     )?
-        .add(&Tensor::full(1e-6f32, (num_frames, num_freq_bins), samples.device())?) // epsilon for numerical stability
+    .add(&Tensor::full(
+        1e-6f32,
+        (num_frames, num_freq_bins),
+        samples.device(),
+    )?) // epsilon for numerical stability
 }
 
 fn load_mel_buffer(n_freqs: usize, num_mel_bins: usize) -> candle_core::Result<Tensor> {

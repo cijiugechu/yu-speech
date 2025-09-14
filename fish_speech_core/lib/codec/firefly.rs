@@ -1,4 +1,4 @@
-use candle_core::{DType, Result, Tensor, D};
+use candle_core::{D, DType, Result, Tensor};
 use candle_nn::VarBuilder;
 
 use super::config::FireflyConfig;

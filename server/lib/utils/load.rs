@@ -9,9 +9,9 @@ use fish_speech_core::codec::{FireflyCodec, FireflyConfig};
 use fish_speech_core::{
     config::{WhichCodec, WhichFishVersion, WhichLM, WhichModel},
     lm::{
+        DualARTransformer,
         dual_ar::{BaseModelArgs, TokenConfig},
         sampling::SamplingArgs,
-        DualARTransformer,
     },
 };
 pub use futures_util::Stream;

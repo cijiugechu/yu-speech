@@ -1,9 +1,9 @@
 #[cfg(feature = "cuda")]
 use super::ops::repeat_kv::repeat_kv;
 use anyhow;
-use candle_core::{DType, Device, IndexOp, Result, Tensor, D};
+use candle_core::{D, DType, Device, IndexOp, Result, Tensor};
 use candle_nn::{
-    embedding, ops::silu, ops::softmax_last_dim, Embedding, Linear, Module, RmsNorm, VarBuilder,
+    Embedding, Linear, Module, RmsNorm, VarBuilder, embedding, ops::silu, ops::softmax_last_dim,
 };
 use serde::Deserialize;
 use serde_json;

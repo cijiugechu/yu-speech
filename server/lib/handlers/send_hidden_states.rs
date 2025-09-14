@@ -3,14 +3,14 @@ use super::speech::{server_lm_generate_blocking, vocode_semantic_tokens};
 use crate::state::AppState;
 use anyhow::Context;
 use axum::body::Body;
-use axum::{extract::State, http::StatusCode, response::Response, Json};
+use axum::{Json, extract::State, http::StatusCode, response::Response};
 use candle_core::Tensor;
 use fish_speech_core::config::WhichModel;
 use fish_speech_core::text::{clean::preprocess_text, prompt::PromptEncoder};
 use serde::Deserialize;
 use std::io::{Cursor, Write};
 use std::sync::Arc;
-use zip::{write::FileOptions, ZipWriter};
+use zip::{ZipWriter, write::FileOptions};
 
 #[derive(Debug, Deserialize)]
 pub struct GenerateHiddenStatesRequest {

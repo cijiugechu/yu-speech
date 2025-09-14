@@ -1,4 +1,4 @@
-use candle_core::{Device, Result, Tensor, D};
+use candle_core::{D, Device, Result, Tensor};
 use candle_nn::{Module, VarBuilder};
 
 use super::config::FireflyConfig;

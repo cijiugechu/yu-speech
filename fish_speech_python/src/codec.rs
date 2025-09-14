@@ -5,7 +5,7 @@ use fish_speech_core::config::{WhichCodec, WhichFishVersion, WhichModel};
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 
-use super::utils::{get_device, get_version, wrap_err, PyRes};
+use super::utils::{PyRes, get_device, get_version, wrap_err};
 
 #[pyclass]
 pub struct FireflyCodec {
@@ -30,7 +30,7 @@ impl FireflyCodec {
                 return Err(PyException::new_err(format!(
                     "Unsupported dtype on device {}: {}",
                     device, d
-                )))
+                )));
             }
         };
         let device = get_device(device)?;

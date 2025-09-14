@@ -1,5 +1,5 @@
 use crate::config::WhichFishVersion;
-use candle_core::{IndexOp, Result, D};
+use candle_core::{D, IndexOp, Result};
 use candle_nn::{Conv1d, Conv1dConfig, ConvTranspose1d, ConvTranspose1dConfig, Module, VarBuilder};
 
 #[derive(Clone)]

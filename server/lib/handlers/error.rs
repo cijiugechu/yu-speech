@@ -1,7 +1,7 @@
+use axum::extract::multipart::MultipartError;
 use axum::http::StatusCode;
 use axum::response::Response;
 use candle_core::Error as CandleError;
-use axum::extract::multipart::MultipartError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -48,12 +48,15 @@ impl axum::response::IntoResponse for AppError {
         };
         let message = self.to_string();
 
-        (status, axum::response::Json(serde_json::json!({
-            "error": {
-                "kind": kind,
-                "message": message
-            }
-        })))
+        (
+            status,
+            axum::response::Json(serde_json::json!({
+                "error": {
+                    "kind": kind,
+                    "message": message
+                }
+            })),
+        )
             .into_response()
     }
 }

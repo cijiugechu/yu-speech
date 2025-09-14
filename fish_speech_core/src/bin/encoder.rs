@@ -41,7 +41,7 @@ fn main() -> Result<()> {
     #[cfg(not(any(feature = "metal", feature = "cuda")))]
     let device = Device::Cpu;
 
-    let encoder_version = WhichCodec::from_model(args.fish_version.clone());
+    let encoder_version = WhichCodec::from_model(args.fish_version);
     let fish_version = match encoder_version {
         WhichCodec::Mimi => anyhow::bail!("Only official Fish HiFiGAN supported"),
         WhichCodec::Fish(v) => v,
@@ -58,7 +58,7 @@ fn main() -> Result<()> {
         _ => "firefly-gan-vq-fsq-8x1024-21hz-generator.safetensors",
     };
 
-    let config = FireflyConfig::get_config_for(fish_version.clone());
+    let config = FireflyConfig::get_config_for(fish_version);
     // Add spurious batch dimension for consistency
     audio = torchaudio::functional::resample(&audio, sr, config.spec_transform.sample_rate as u32)?
         .unsqueeze(0)?;

@@ -66,7 +66,7 @@ impl<'a> BatchGenerator<'a> {
 
     // returns (prompt, mask) concatenated
     fn pad_prompts(prompts: &[Tensor], model: &DualARTransformer) -> Result<(Tensor, Tensor)> {
-        if prompts.len() == 0 {
+        if prompts.is_empty() {
             candle_core::bail!("Must have at least one prompt")
         }
         let prompt_lengths: Vec<usize> = prompts
@@ -321,10 +321,10 @@ pub fn generate_static_batch(
     println!("Sequences");
 
     let start_decode = Instant::now();
-    for (i, maybe_batch_pos) in generator.into_iter().enumerate() {
+    for (i, maybe_batch_pos) in generator.enumerate() {
         let vq_token = maybe_batch_pos?;
         // let mut items: Vec<String> = Vec::with_capacity(sequences.len());
-        for (_, (seq, pos)) in sequences.iter_mut().zip(vq_token.into_iter()).enumerate() {
+        for (seq, pos) in sequences.iter_mut().zip(vq_token.into_iter()) {
             if !(audio_only && !pos.is_active) {
                 seq.tokens.push(pos.codes);
                 seq.is_audio_steps.push(pos.is_audio);

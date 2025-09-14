@@ -25,7 +25,7 @@ impl Codec {
                 debug!("out: {:?}", out);
                 out
             }
-            Codec::Firefly(state) => state.encode(&audio),
+            Codec::Firefly(state) => state.encode(audio),
         }
     }
 
@@ -42,7 +42,7 @@ impl Codec {
                 model.reset();
                 tokens
             }
-            Codec::Firefly(state) => state.decode(&semantic_tokens),
+            Codec::Firefly(state) => state.decode(semantic_tokens),
         }
     }
 }

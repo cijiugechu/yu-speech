@@ -93,25 +93,25 @@ pub fn load_lm(
     let lm_version = WhichLM::from_model(args.fish_version);
     let vb_lm = match lm_version {
         WhichLM::Fish(WhichFishVersion::Fish1_2) => {
-            VarBuilder::from_pth(weight_path, dtype, &device)?
+            VarBuilder::from_pth(weight_path, dtype, device)?
         }
-        _ => unsafe { VarBuilder::from_mmaped_safetensors(&[weight_path], dtype, &device)? },
+        _ => unsafe { VarBuilder::from_mmaped_safetensors(&[weight_path], dtype, device)? },
     };
-    let lm_version = WhichLM::from_model(args.fish_version.clone());
-    let semantic_token_config = TokenConfig::new(lm_version.clone(), &tokenizer, &semantic_config)?;
+    let lm_version = WhichLM::from_model(args.fish_version);
+    let semantic_token_config = TokenConfig::new(lm_version, &tokenizer, &semantic_config)?;
     let semantic_model = Arc::new(Mutex::new(DualARTransformer::load(
         &vb_lm,
         &semantic_config,
         &semantic_token_config,
-        lm_version.clone(),
+        lm_version,
     )?));
     // Load all voices into memory
     let (speakers, default_speaker) = load_speaker_prompts(
         &args.voice_dir,
         &tokenizer,
-        &device,
+        device,
         semantic_config.num_codebooks,
-        lm_version.clone(),
+        lm_version,
     )?;
     info!("Loaded {} voices", speakers.len());
     let default_sampling_args = SamplingArgs {
@@ -147,7 +147,7 @@ pub fn load_codec(
 ) -> anyhow::Result<(Codec, u32)> {
     let repo = get_model_repo(args.fish_version)?;
 
-    let codec_type = WhichCodec::from_model(args.fish_version.clone());
+    let codec_type = WhichCodec::from_model(args.fish_version);
     match codec_type {
         WhichCodec::Fish(version) => {
             let weight_name = match args.fish_version {
@@ -159,9 +159,9 @@ pub fn load_codec(
                 None => repo.get(weight_name)?,
             };
             let vb = match version {
-                WhichFishVersion::Fish1_2 => VarBuilder::from_pth(vb_path, DType::F32, &device)?,
+                WhichFishVersion::Fish1_2 => VarBuilder::from_pth(vb_path, DType::F32, device)?,
                 _ => unsafe {
-                    VarBuilder::from_mmaped_safetensors(&[vb_path], DType::F32, &device)?
+                    VarBuilder::from_mmaped_safetensors(&[vb_path], DType::F32, device)?
                 },
             };
             let firefly_config = FireflyConfig::get_config_for(version);

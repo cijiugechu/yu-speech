@@ -72,7 +72,7 @@ impl<'a> PromptEncoder<'a> {
                 // Fish 1.5: get semantic IDs without using f64 scalar ops on device
                 let semantic_start = self.tokenizer.token_to_id("<|semantic:0|>").unwrap();
                 let base =
-                    Tensor::from_vec(vec![semantic_start as u32; seqlen], seqlen, &self.device)?;
+                    Tensor::from_vec(vec![semantic_start; seqlen], seqlen, &self.device)?;
                 let row0 = prompt_tokens.i((0, ..))?.to_dtype(DType::U32)?;
                 row0.broadcast_add(&base)?
             }
@@ -88,7 +88,7 @@ impl<'a> PromptEncoder<'a> {
                 Tensor::cat(&[semantic_tokens, prompt_tokens.clone()], 0)
             }
             _ => {
-                let data = prompt_tokens.broadcast_add(&Tensor::ones_like(&prompt_tokens)?)?;
+                let data = prompt_tokens.broadcast_add(&Tensor::ones_like(prompt_tokens)?)?;
                 Tensor::cat(&[semantic_tokens, data], 0)
             }
         };
@@ -114,7 +114,7 @@ impl<'a> PromptEncoder<'a> {
         cached_speaker: Option<Tensor>,
         assume_kv_cache: bool,
     ) -> Result<(usize, Vec<Tensor>)> {
-        if chunks.len() == 0 {
+        if chunks.is_empty() {
             candle_core::bail!("Input text cannot be empty");
         }
 
@@ -149,7 +149,7 @@ impl<'a> PromptEncoder<'a> {
             if conditioning_tokens.is_some() && (i == 0 || !assume_kv_cache) {
                 prompt.push(conditioning_tokens.clone().unwrap());
             }
-            prompt.push(self.encode_text("user", Some(&chunk))?);
+            prompt.push(self.encode_text("user", Some(chunk))?);
             prompt.push(assistant_start.clone());
 
             let encoded = Tensor::cat(&prompt, 1)?;
@@ -170,7 +170,7 @@ pub fn load_prompt_text(
         (2, Ok(n_actual_codebooks)) => {
             // Fine
             if n_actual_codebooks == num_codebooks {
-                return Ok(prompt_tokens);
+                Ok(prompt_tokens)
             } else {
                 candle_core::bail!(
                     "Expected {} codebooks but got {}",

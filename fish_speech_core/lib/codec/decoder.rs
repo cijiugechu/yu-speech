@@ -9,7 +9,7 @@ use crate::config::WhichFishVersion;
 fn sequence_mask(lengths: &Tensor, max_length: Option<u32>, device: &Device) -> Result<Tensor> {
     // If lengths is empty, we have bigger problems
     let max_length = max_length.unwrap_or(lengths.max_keepdim(D::Minus1)?.to_vec1::<u32>()?[0]);
-    let x = Tensor::arange(0 as u32, max_length as u32, device)?.unsqueeze(0)?;
+    let x = Tensor::arange(0_u32, max_length, device)?.unsqueeze(0)?;
     x.broadcast_lt(&lengths.unsqueeze(1)?)
 }
 

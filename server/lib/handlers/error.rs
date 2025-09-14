@@ -63,6 +63,6 @@ impl axum::response::IntoResponse for AppError {
 
 impl From<AppError> for std::io::Error {
     fn from(err: AppError) -> Self {
-        std::io::Error::new(std::io::ErrorKind::Other, err.to_string())
+        std::io::Error::other(err.to_string())
     }
 }

@@ -71,7 +71,7 @@ fn linear_spectrogram(samples: &Tensor, fft_size: usize, hop_size: usize) -> Can
     // Flatten the frames properly
     let flat_spectrogram: Vec<f32> = spectrogram_frames
         .into_iter()
-        .flat_map(|frame| frame) // Flatten each frame but maintain frequency count
+        .flatten() // Flatten each frame but maintain frequency count
         .collect();
 
     // Ensure the flattened spectrogram has the correct shape: [num_frames, num_freq_bins]
@@ -133,7 +133,7 @@ pub struct LogMelSpectrogram {
 
 impl LogMelSpectrogram {
     pub fn load(config: LogMelSpectrogramConfig) -> CandleResult<Self> {
-        let mel_buffer = load_mel_buffer((config.n_fft / 2) + 1, *&config.n_mels)?;
+        let mel_buffer = load_mel_buffer((config.n_fft / 2) + 1, config.n_mels)?;
 
         Ok(Self {
             sample_rate: config.sample_rate,

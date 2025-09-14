@@ -27,7 +27,7 @@ fn generate_long(
         repetition_penalty: args.repetition_penalty,
     };
 
-    if &args.prompt_tokens.len() != &args.prompt_text.len() {
+    if args.prompt_tokens.len() != args.prompt_text.len() {
         Err(anyhow::anyhow!(
             "Prompt token length {:?} does not match prompt text length {:?}",
             &args.prompt_tokens.len(),
@@ -197,7 +197,7 @@ fn main() -> anyhow::Result<()> {
 
     let token_config = TokenConfig::new(fish_version, &tokenizer, &config)?;
     let mut model =
-        DualARTransformer::load(&vb, &config, &token_config, fish_version.clone()).unwrap();
+        DualARTransformer::load(&vb, &config, &token_config, fish_version).unwrap();
     println!("Model loaded to {:?}", device);
     generate_long(&mut model, &tokenizer, &args, &device, fish_version)?;
 

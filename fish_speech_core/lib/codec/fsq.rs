@@ -19,9 +19,9 @@ pub struct FSQ {
 // This is also not implemented as a unary op
 fn atanh(x: &Tensor) -> Result<Tensor> {
     // atanh(x) = 0.5 * ln((1 + x) / (1 - x))
-    let numerator = (1.0 as f64 + x)?;
-    let denominator = (1.0 as f64 - x)?;
-    numerator.div(&denominator)?.log()? * 0.5 as f64
+    let numerator = (1.0_f64 + x)?;
+    let denominator = (1.0_f64 - x)?;
+    numerator.div(&denominator)?.log()? * 0.5_f64
 }
 
 // This is also not implemented as a binary op. Don't ask me why
@@ -68,14 +68,14 @@ impl FSQ {
     pub fn bound(&self, z: &Tensor) -> Result<Tensor> {
         // let levels_sub_1 = self.levels.sub(&Tensor::ones_like(&self.levels)?)?;
         let levels_sub_1 = (self.levels.clone() - 1f64)?;
-        let half_l = ((levels_sub_1 * 1.001 as f64)? / 2.0 as f64)?;
+        let half_l = ((levels_sub_1 * 1.001_f64)? / 2.0_f64)?;
 
         let remainder = remainder_float(&self.levels, 2.0)?;
 
         let offset = (remainder
             .eq(&Tensor::zeros_like(&self.levels)?)?
             .to_dtype(self.levels.dtype())?
-            * 0.5 as f64)?;
+            * 0.5_f64)?;
 
         let shift = atanh(&offset.div(&half_l)?)?;
         z.broadcast_add(&shift)?
@@ -87,7 +87,7 @@ impl FSQ {
     pub fn quantize(&self, z: &Tensor) -> Result<Tensor> {
         let quantized = self.bound(z)?.round()?;
 
-        let half_width = (self.levels.clone() / 2.0 as f64)?.floor()?;
+        let half_width = (self.levels.clone() / 2.0_f64)?.floor()?;
         quantized.broadcast_div(&half_width)
     }
 
@@ -110,19 +110,19 @@ impl FSQ {
     }
 
     fn _scale_and_shift(&self, zhat_normalized: &Tensor) -> Result<Tensor> {
-        let half_width = (self.levels.clone() / 2.0 as f64)?.floor()?;
+        let half_width = (self.levels.clone() / 2.0_f64)?.floor()?;
         zhat_normalized
             .broadcast_mul(&half_width)?
             .broadcast_add(&half_width)
     }
 
     fn _scale_and_shift_inverse(&self, zhat: &Tensor) -> Result<Tensor> {
-        let half_width = (self.levels.clone() / 2.0 as f64)?.floor()?;
+        let half_width = (self.levels.clone() / 2.0_f64)?.floor()?;
         zhat.broadcast_sub(&half_width)?.broadcast_div(&half_width)
     }
 
     pub fn codes_to_indices(&self, zhat: &Tensor) -> Result<Tensor> {
-        let zhat = self._scale_and_shift(&zhat)?;
+        let zhat = self._scale_and_shift(zhat)?;
 
         zhat.broadcast_mul(&self.basis)?
             .sum(D::Minus1)?

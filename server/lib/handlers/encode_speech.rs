@@ -51,7 +51,7 @@ pub async fn encode_speaker(
     if audio.dim(0)? > 1 {
         audio = audio.mean_keepdim(0)?;
     }
-    let audio = functional::resample(&audio, sr, state.sample_rate as u32)?;
+    let audio = functional::resample(&audio, sr, state.sample_rate)?;
     // TODO handle batched audio
     let result = state
         .codec

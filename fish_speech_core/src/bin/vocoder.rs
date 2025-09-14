@@ -47,7 +47,7 @@ fn main() -> Result<()> {
     #[cfg(not(feature = "cuda"))]
     let dtype = DType::F32;
 
-    let encoder_version = WhichCodec::from_model(args.fish_version.clone());
+    let encoder_version = WhichCodec::from_model(args.fish_version);
     let fish_version = match encoder_version {
         WhichCodec::Mimi => anyhow::bail!("Only official Fish HiFiGAN supported"),
         WhichCodec::Fish(v) => v,

@@ -143,7 +143,7 @@ impl GroupedResidualFSQ {
                 num_quantizers: config.num_quantizers,
             };
             rvqs.push(ResidualFSQ::load(
-                vb.pp(&format!("rvqs.{}", i)),
+                vb.pp(format!("rvqs.{}", i)),
                 &rvq_config,
             )?);
         }
@@ -179,7 +179,7 @@ impl GroupedResidualFSQ {
             .rvqs
             .iter()
             .zip(indices.iter())
-            .map(|(rvq, chunk_indices)| rvq.get_output_from_indices(&chunk_indices))
+            .map(|(rvq, chunk_indices)| rvq.get_output_from_indices(chunk_indices))
             .collect();
         Tensor::cat(&out?, D::Minus1)
     }

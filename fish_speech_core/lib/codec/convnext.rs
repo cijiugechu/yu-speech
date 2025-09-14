@@ -70,7 +70,7 @@ impl ConvNeXtBlock {
                 dilation: config.dilation,
                 stride: 1,
             },
-            &model,
+            model,
         )?;
         // println!("In: {}, out: {}, kernel: {}, dilation")
         let norm = LayerNorm::new(
@@ -225,11 +225,11 @@ impl Module for StemLayer {
     fn forward(&self, xs: &Tensor) -> Result<Tensor> {
         let x = self.conv.forward(xs)?;
         let norm = self.norm.forward(&x);
-        let out = self
+        
+        self
             .blocks
             .iter()
-            .try_fold(norm, |acc, block| acc.map(|x| block.forward(&x)))?;
-        out
+            .try_fold(norm, |acc, block| acc.map(|x| block.forward(&x)))?
     }
 }
 
@@ -274,13 +274,13 @@ impl MidLayer {
 
 impl Module for MidLayer {
     fn forward(&self, xs: &Tensor) -> Result<Tensor> {
-        let norm = self.norm.forward(&xs)?;
+        let norm = self.norm.forward(xs)?;
         let maybe_conv = self.conv.forward(&norm);
-        let out = self
+        
+        self
             .blocks
             .iter()
-            .try_fold(maybe_conv, |acc, block| acc.map(|acc| block.forward(&acc)))?;
-        out
+            .try_fold(maybe_conv, |acc, block| acc.map(|acc| block.forward(&acc)))?
     }
 }
 
@@ -329,7 +329,7 @@ impl Module for ConvNeXtEncoder {
             .mid_layers
             .iter()
             .try_fold(x, |acc, layer| acc.map(|x| layer.forward(&x)))?;
-        let x = self.norm.forward(&(x?));
-        x
+        
+        self.norm.forward(&(x?))
     }
 }

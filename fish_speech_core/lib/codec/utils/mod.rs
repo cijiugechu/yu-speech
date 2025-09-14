@@ -37,7 +37,7 @@ impl FishConvNet {
                     _ => "conv.bias",
                 },
             )?),
-            config.clone(),
+            config,
         );
 
         let kernel_size_adj = (kernel_size - 1) * config.dilation + 1;
@@ -45,7 +45,7 @@ impl FishConvNet {
             conv,
             kernel_size_adj,
             stride: config.stride,
-            model: model.clone(),
+            model: *model,
         })
     }
 }
@@ -102,7 +102,7 @@ impl FishTransConvNet {
             conv,
             stride: config.stride,
             kernel_size,
-            model: model.clone(),
+            model: *model,
         })
     }
 }

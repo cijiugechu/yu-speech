@@ -83,9 +83,7 @@ impl<'a> Iterator for SingleBatchGenerator<'a> {
         }
 
         // Audio only, <|im_end|> was reached last time
-        if self.prompt.is_none() {
-            return None;
-        }
+        self.prompt.as_ref()?;
 
         let x = self.prompt.as_ref().unwrap().clone();
         let prompt_length = x.dim(D::Minus1).unwrap();
@@ -259,7 +257,7 @@ pub fn generate_blocking_with_hidden(
     );
     spinner.enable_steady_tick(Duration::from_millis(100));
     let start_decode = Instant::now();
-    for (i, maybe_vq_token) in generator.into_iter().enumerate() {
+    for (i, maybe_vq_token) in generator.enumerate() {
         let vq_token = maybe_vq_token?;
         if vq_token.tokens[0] != im_end_id {
             previous_tokens.push(vq_token.codes);

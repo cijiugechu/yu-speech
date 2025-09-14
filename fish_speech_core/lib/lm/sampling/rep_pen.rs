@@ -50,15 +50,14 @@ impl SingleBatchedRepPenProcessor {
 
         if self.context.len() > self.max_ctxt_size {
             // If the token falling out of the window is the last of its kind, un-penalize it
-            if let Some(dropped_token) = self.context.pop_back() {
-                if let Some(count) = self.tokens_seen.get_mut(&dropped_token) {
+            if let Some(dropped_token) = self.context.pop_back()
+                && let Some(count) = self.tokens_seen.get_mut(&dropped_token) {
                     *count -= 1;
                     if *count == 0 {
                         self.tokens_seen.remove(&dropped_token);
                         self.penalty_mask.slice_set(&self.one, 0, dropped_token)?;
                     }
                 }
-            }
         }
 
         logits.broadcast_div(&self.penalty_mask)
@@ -107,9 +106,9 @@ impl SequencePenalty {
         }
         self.context.push_front(token);
 
-        if self.context.len() > self.max_ctxt_size {
-            if let Some(dropped_token) = self.context.pop_back() {
-                if let Some(count) = self.tokens_seen.get_mut(&dropped_token) {
+        if self.context.len() > self.max_ctxt_size
+            && let Some(dropped_token) = self.context.pop_back()
+                && let Some(count) = self.tokens_seen.get_mut(&dropped_token) {
                     *count -= 1;
                     if *count == 0 {
                         self.tokens_seen.remove(&dropped_token);
@@ -117,8 +116,6 @@ impl SequencePenalty {
                         self.penalty_mask[dropped_token as usize] = 1.0;
                     }
                 }
-            }
-        }
         Ok(())
     }
 

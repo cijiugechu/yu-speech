@@ -21,11 +21,10 @@ impl DownsampleFiniteScalarQuantizer {
     ) -> Result<Self> {
         let all_dims: Vec<usize> = if let Some(downsample_dims) = config.downsample_dims.clone() {
             std::iter::once(config.input_dim)
-                .chain(downsample_dims.into_iter())
+                .chain(downsample_dims)
                 .collect()
         } else {
-            std::iter::repeat(config.input_dim)
-                .take(config.downsample_factor.len() + 1)
+            std::iter::repeat_n(config.input_dim, config.downsample_factor.len() + 1)
                 .collect()
         };
 
@@ -58,9 +57,9 @@ impl DownsampleFiniteScalarQuantizer {
             )?;
 
             let block = ConvNeXtBlock::load(
-                vb_ds.pp(&format!("{}.1", idx)),
+                vb_ds.pp(format!("{}.1", idx)),
                 &ConvNeXtBlockConfig::with_dim(out_channels),
-                &model,
+                model,
             )?;
 
             downsample_layers.push((conv, block));
@@ -85,9 +84,9 @@ impl DownsampleFiniteScalarQuantizer {
             )?;
 
             let block = ConvNeXtBlock::load(
-                vb_us.pp(&format!("{}.1", idx)),
+                vb_us.pp(format!("{}.1", idx)),
                 &ConvNeXtBlockConfig::with_dim(in_channels),
-                &model,
+                model,
             )?;
 
             upsample_layers.push((conv, block));

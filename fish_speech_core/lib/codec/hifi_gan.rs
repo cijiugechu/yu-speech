@@ -39,7 +39,7 @@ impl ResBlock1 {
                     },
                     ..Default::default()
                 },
-                &model,
+                model,
             )?;
             convs1.push(conv)
         }

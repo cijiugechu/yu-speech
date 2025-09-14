@@ -27,7 +27,7 @@ pub async fn server_lm_generate_blocking(
     let mut model = state.lm.model.lock().await;
     let (tokens, hidden_states) = generate_blocking_with_hidden(
         &mut model,
-        &encoded_input,
+        encoded_input,
         state.lm.max_new_tokens,
         sampling_args,
         collect_hidden_states,
@@ -43,7 +43,7 @@ pub async fn server_lm_generate_blocking(
         info!("Failed generation suspected. Rerolling once");
         let (new_tokens, new_hidden_states) = generate_blocking_with_hidden(
             &mut model,
-            &encoded_input,
+            encoded_input,
             state.lm.max_new_tokens,
             sampling_args,
             collect_hidden_states,
@@ -205,12 +205,12 @@ async fn generate_speech_streaming(
                     };
                     let resample_start = std::time::Instant::now();
                     let resampled_pcm: Tensor = resample(&pcm_data.unsqueeze(0).unwrap(), src_rate, DST_RATE)
-                        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+                        .map_err(|e| std::io::Error::other(e.to_string()))?
                         .flatten_all()
-                        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
+                        .map_err(|e| std::io::Error::other(e.to_string()))?;
                     let resampled_pcm = resampled_pcm
                         .to_vec1::<f32>()
-                        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("PCM generation failed: {}", e)))?;
+                        .map_err(|e| std::io::Error::other(format!("PCM generation failed: {}", e)))?;
                     let duration = resample_start.elapsed();
                     info!("CPU resampling took: {:?}", duration);
                     let mut encoder = encoder.lock().await;
@@ -220,10 +220,10 @@ async fn generate_speech_streaming(
                                 yield Ok(Bytes::copy_from_slice(chunk));
                             }
                         }
-                        Err(e) => yield Err(std::io::Error::new(std::io::ErrorKind::Other, format!("PCM generation failed: {}", e)))
+                        Err(e) => yield Err(std::io::Error::other(format!("PCM generation failed: {}", e)))
                     }
                 }
-                Err(e) => yield Err(std::io::Error::new(std::io::ErrorKind::Other, format!("PCM generation failed: {}", e)))
+                Err(e) => yield Err(std::io::Error::other(format!("PCM generation failed: {}", e)))
             }
         }
     };

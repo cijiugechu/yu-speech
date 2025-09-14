@@ -658,7 +658,7 @@ impl DualARTransformer {
         })?;
 
         let fast_out = self.fast_norm.forward(&x)?;
-        
+
         match self.cfg.depthwise_output {
             Some(true) => {
                 let weights = self.fast_output.weight();

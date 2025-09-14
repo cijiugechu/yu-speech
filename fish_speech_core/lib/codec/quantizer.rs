@@ -24,8 +24,7 @@ impl DownsampleFiniteScalarQuantizer {
                 .chain(downsample_dims)
                 .collect()
         } else {
-            std::iter::repeat_n(config.input_dim, config.downsample_factor.len() + 1)
-                .collect()
+            std::iter::repeat_n(config.input_dim, config.downsample_factor.len() + 1).collect()
         };
 
         let residual_fsq = GroupedResidualFSQ::load(

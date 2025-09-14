@@ -196,8 +196,7 @@ fn main() -> anyhow::Result<()> {
     };
 
     let token_config = TokenConfig::new(fish_version, &tokenizer, &config)?;
-    let mut model =
-        DualARTransformer::load(&vb, &config, &token_config, fish_version).unwrap();
+    let mut model = DualARTransformer::load(&vb, &config, &token_config, fish_version).unwrap();
     println!("Model loaded to {:?}", device);
     generate_long(&mut model, &tokenizer, &args, &device, fish_version)?;
 

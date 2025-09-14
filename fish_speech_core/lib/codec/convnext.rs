@@ -225,9 +225,8 @@ impl Module for StemLayer {
     fn forward(&self, xs: &Tensor) -> Result<Tensor> {
         let x = self.conv.forward(xs)?;
         let norm = self.norm.forward(&x);
-        
-        self
-            .blocks
+
+        self.blocks
             .iter()
             .try_fold(norm, |acc, block| acc.map(|x| block.forward(&x)))?
     }
@@ -276,9 +275,8 @@ impl Module for MidLayer {
     fn forward(&self, xs: &Tensor) -> Result<Tensor> {
         let norm = self.norm.forward(xs)?;
         let maybe_conv = self.conv.forward(&norm);
-        
-        self
-            .blocks
+
+        self.blocks
             .iter()
             .try_fold(maybe_conv, |acc, block| acc.map(|acc| block.forward(&acc)))?
     }
@@ -329,7 +327,7 @@ impl Module for ConvNeXtEncoder {
             .mid_layers
             .iter()
             .try_fold(x, |acc, layer| acc.map(|x| layer.forward(&x)))?;
-        
+
         self.norm.forward(&(x?))
     }
 }

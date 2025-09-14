@@ -1,38 +1,65 @@
 use axum::http::StatusCode;
 use axum::response::Response;
-// Custom error wrapper that holds anyhow::Error
-pub struct AppError(pub anyhow::Error);
+use candle_core::Error as CandleError;
+use axum::extract::multipart::MultipartError;
+use thiserror::Error;
 
-// Convert anyhow::Error into AppError
-impl<E> From<E> for AppError
-where
-    E: Into<anyhow::Error>,
-{
-    fn from(err: E) -> Self {
-        Self(err.into())
-    }
+#[derive(Debug, Error)]
+pub enum AppError {
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Serialization error: {0}")]
+    SerdeJson(#[from] serde_json::Error),
+
+    #[error("Zip error: {0}")]
+    Zip(#[from] zip::result::ZipError),
+
+    #[error("Candle error: {0}")]
+    Candle(#[from] CandleError),
+
+    #[error("Axum error: {0}")]
+    Axum(#[from] axum::http::Error),
+
+    #[error("Multipart error: {0}")]
+    Multipart(#[from] MultipartError),
+
+    #[error(transparent)]
+    Anyhow(#[from] anyhow::Error),
+
+    #[error("Application error: {0}")]
+    Message(String),
 }
 
-// Implement IntoResponse for AppError to convert errors into HTTP responses
 impl axum::response::IntoResponse for AppError {
     fn into_response(self) -> Response {
         // Log the error with its full chain of causes
-        tracing::error!("Application error: {:#}", self.0);
+        tracing::error!("Application error: {self}");
 
-        // You can match on specific error types and return different status codes
-        let status = if self.0.downcast_ref::<std::io::Error>().is_some() {
-            StatusCode::INTERNAL_SERVER_ERROR
-        } else {
-            StatusCode::INTERNAL_SERVER_ERROR
+        let (status, kind) = match &self {
+            AppError::Io(_) => (StatusCode::INTERNAL_SERVER_ERROR, "io"),
+            AppError::SerdeJson(_) => (StatusCode::BAD_REQUEST, "serde_json"),
+            AppError::Zip(_) => (StatusCode::INTERNAL_SERVER_ERROR, "zip"),
+            AppError::Candle(_) => (StatusCode::INTERNAL_SERVER_ERROR, "candle"),
+            AppError::Axum(_) => (StatusCode::INTERNAL_SERVER_ERROR, "axum"),
+            AppError::Anyhow(_) => (StatusCode::INTERNAL_SERVER_ERROR, "anyhow"),
+            AppError::Message(_) => (StatusCode::INTERNAL_SERVER_ERROR, "message"),
+            AppError::Multipart(_) => (StatusCode::INTERNAL_SERVER_ERROR, "multipart"),
         };
+        let message = self.to_string();
 
-        // Return the error response
-        (status, format!("Something went wrong: {}", self.0)).into_response()
+        (status, axum::response::Json(serde_json::json!({
+            "error": {
+                "kind": kind,
+                "message": message
+            }
+        })))
+            .into_response()
     }
 }
 
 impl From<AppError> for std::io::Error {
     fn from(err: AppError) -> Self {
-        std::io::Error::new(std::io::ErrorKind::Other, err.0.to_string())
+        std::io::Error::new(std::io::ErrorKind::Other, err.to_string())
     }
 }

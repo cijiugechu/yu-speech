@@ -1,6 +1,5 @@
 use super::error::AppError;
 use crate::state::AppState;
-use anyhow::anyhow;
 use axum::{
     extract::{Multipart, Query, State},
     http::StatusCode,
@@ -72,7 +71,7 @@ pub async fn encode_speaker(
             state.lm.model_type,
         );
         if speaker_map.contains_key(id) {
-            return Err(AppError(anyhow!("ID already exists on server: {}", id)));
+            return Err(AppError::Message(format!("ID already exists on server: {}", id)));
         }
         let new_prompt = prompt_encoder
             .encode_conditioning_prompt(prompt, &result.to_dtype(candle_core::DType::U32)?)?;

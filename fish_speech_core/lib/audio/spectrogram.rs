@@ -79,7 +79,8 @@ fn linear_spectrogram(samples: &Tensor, fft_size: usize, hop_size: usize) -> Can
         flat_spectrogram,
         (num_frames, num_freq_bins),
         samples.device(),
-    )? + 1e-6 // This is the epsilon added for numerical stability
+    )?
+        .add(&Tensor::full(1e-6f32, (num_frames, num_freq_bins), samples.device())?) // epsilon for numerical stability
 }
 
 fn load_mel_buffer(n_freqs: usize, num_mel_bins: usize) -> candle_core::Result<Tensor> {

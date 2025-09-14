@@ -69,17 +69,19 @@ impl<'a> PromptEncoder<'a> {
 
         let semantic_tokens = match self.model_type {
             WhichLM::DualAR | WhichLM::Fish(WhichFishVersion::Fish1_5) => {
-                // Fish 1.5: get semantic IDs
+                // Fish 1.5: get semantic IDs without using f64 scalar ops on device
                 let semantic_start = self.tokenizer.token_to_id("<|semantic:0|>").unwrap();
-                semantic_start as f64 + prompt_tokens.i((0, ..))?
+                let base = Tensor::from_vec(vec![semantic_start as u32; seqlen], seqlen, &self.device)?;
+                let row0 = prompt_tokens.i((0, ..))?.to_dtype(DType::U32)?;
+                row0.broadcast_add(&base)?
             }
             _ => {
                 // Fish 1.4 and below: Just use semantic
                 let semantic_id = self.tokenizer.token_to_id("<|semantic|>").unwrap_or(5);
-                Tensor::from_vec(vec![semantic_id; seqlen], seqlen, &self.device)
+                Tensor::from_vec(vec![semantic_id; seqlen], seqlen, &self.device)?
             }
         };
-        let semantic_tokens = semantic_tokens?.unsqueeze(0)?;
+        let semantic_tokens = semantic_tokens.unsqueeze(0)?;
         let vq_span = match self.model_type {
             WhichLM::DualAR | WhichLM::Fish(WhichFishVersion::Fish1_5) => {
                 Tensor::cat(&[semantic_tokens, prompt_tokens.clone()], 0)

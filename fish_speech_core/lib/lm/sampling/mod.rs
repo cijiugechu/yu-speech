@@ -15,7 +15,7 @@ pub fn legacy_softmax_sample(pad_prob: f32, eos_prob: f32, pad_id: u32, eos_id: 
 
     // Generate a random number
     let mut rng = rand::thread_rng();
-    let rand_val: f32 = rng.gen(); // Generates a float between 0.0 and 1.0
+    let rand_val: f32 = rng.r#gen(); // Generates a float between 0.0 and 1.0
 
     // Sample according to softmax probabilities
     if rand_val < softmax_pad {
@@ -91,7 +91,7 @@ impl BatchedLogitsProcessor {
 
         // Split RNG into independent streams
         let rngs = (0..probs.len())
-            .map(|_| rand::rngs::StdRng::seed_from_u64(self.rng.gen()))
+            .map(|_| rand::rngs::StdRng::seed_from_u64(self.rng.r#gen()))
             .collect::<Vec<_>>();
 
         Ok(probs

@@ -1,7 +1,7 @@
 [package]
 name = "fish_speech_python"
 version = { workspace = true }
-edition = "2021"
+edition.workspace = true
 
 [lib]
 name = "fish_speech"
@@ -12,12 +12,12 @@ cuda = ["candle-core/cuda", "candle-nn/cuda", "fish_speech_core/cuda"]
 metal = ["candle-core/metal", "candle-nn/metal", "fish_speech_core/metal"]
 
 [dependencies]
-anyhow = "1.0.96"
+anyhow = { workspace = true }
 candle-core = { workspace = true }
 candle-nn = { workspace = true }
-numpy = "0.23.0"
-pyo3 = { version = "0.23.0", features = ["extension-module"] }
+numpy = { workspace = true }
+pyo3 = { workspace = true, features = ["extension-module"] }
 tokenizers = { workspace = true }
+fish_speech_core = { workspace = true }
 
-[dependencies.fish_speech_core]
-path = "../fish_speech_core"
+

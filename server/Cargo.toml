@@ -1,7 +1,7 @@
 [package]
 name = "server"
 version = { workspace = true }
-edition = "2021"
+edition.workspace = true
 
 [lib]
 name = "server"
@@ -25,41 +25,42 @@ mimi = ["dep:moshi"]
 
 
 [dependencies]
-anyhow = "1"
-async-stream = "0.3"
-axum = { version = "0.8", features = ["multipart"] }
-byteorder = "1.5.0"
-bytes = "1.8.0"
+anyhow = { workspace = true }
+async-stream = { workspace = true }
+axum = { workspace = true }
+byteorder = { workspace = true }
+bytes = { workspace = true }
 candle-core = { workspace = true }
 candle-flash-attn = { workspace = true, optional = true }
 candle-nn = { workspace = true }
 candle-transformers = { workspace = true }
-clap = { version = "4.5.16", features = ["derive"] }
-futures = "0.3"
-futures-util = "0.3"
-hf-hub = "0.4.1"
-indicatif = "0.17.8"
-moshi = { version = "0.5.2", optional = true }
-num = "0.4"
-num-traits = "0.2"
-ogg = { version = "0.9.1", features = ["tokio-util", "async"] }
-opus2 = "0.3"
-rand = "0.8"
-regex = "1.10"
-rustfft = "6.2"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-symphonia = "0.5"
-tempfile = "3"
-thiserror = "1"
+clap = { workspace = true }
+futures = { workspace = true }
+futures-util = { workspace = true }
+hf-hub = { workspace = true }
+indicatif = { workspace = true }
+moshi = { workspace = true, optional = true }
+num = { workspace = true }
+num-traits = { workspace = true }
+ogg = { workspace = true }
+opus2 = { workspace = true }
+rand = { workspace = true }
+regex = { workspace = true }
+rustfft = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+symphonia = { workspace = true }
+tempfile = { workspace = true }
+thiserror = { workspace = true }
 tokenizers = { workspace = true }
-tokio = { version = "1", features = ["full"] }
-tokio-util = "0.7"
-tower = "0.5"
-tower-http = { version = "0.6", features = ["cors"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-zip = { version = "5" }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+zip = { workspace = true }
 
-[dependencies.fish_speech_core]
-path = "../fish_speech_core"
+fish_speech_core = { workspace = true }
+
+

@@ -1,6 +1,6 @@
 [package]
 name = "candle-gqa-kernels"
-edition = "2021"
+edition.workspace = true
 version.workspace = true
 
 description = "CUDA kernels for GQA Candle models"
@@ -13,4 +13,4 @@ license = "MIT"
 [dependencies]
 
 [build-dependencies]
-bindgen_cuda = "0.1.5"
+bindgen_cuda = { workspace = true }

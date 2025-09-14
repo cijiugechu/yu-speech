@@ -13,12 +13,15 @@ package.edition = "2024"
 inherits = "release"
 debug = true
 
+[profile.release]
+codegen-units = 1
+
 [workspace.dependencies]
-candle-core = "0.8.3"
-candle-nn = "0.8.3"
-candle-transformers = "0.8.3"
-candle-flash-attn = "0.8.3"
-tokenizers = "0.20.0"
+candle-core = "0.9"
+candle-nn = "0.9"
+candle-transformers = "0.9"
+candle-flash-attn = "0.9"
+tokenizers = "0.22"
 anyhow = "1"
 async-stream = "0.3"
 axum = { version = "0.8", features = ["multipart"] }

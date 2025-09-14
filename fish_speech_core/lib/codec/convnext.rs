@@ -69,6 +69,7 @@ impl ConvNeXtBlock {
                 groups: config.dim,
                 dilation: config.dilation,
                 stride: 1,
+                cudnn_fwd_algo: None,
             },
             model,
         )?;

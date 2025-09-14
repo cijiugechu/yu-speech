@@ -17,10 +17,17 @@ use std::sync::Arc;
 use std::time::Instant;
 // Re-export the key types
 use tower_http::cors::{Any, CorsLayer};
+use tracing::info;
+use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
+
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
+        .with_writer(std::io::stdout)
+        .try_init();
 
     #[cfg(feature = "cuda")]
     let device = Device::cuda_if_available(0)?;
@@ -42,13 +49,13 @@ async fn main() -> anyhow::Result<()> {
     #[cfg(not(feature = "cuda"))]
     let dtype = DType::F32;
 
-    println!("Loading {:?} model on {:?}", args.fish_version, device);
+    info!("Loading {:?} model on {:?}", args.fish_version, device);
     let start_load = Instant::now();
     let lm_state = load_lm(&args, checkpoint_dir, dtype, &device)?;
     let (codec_state, sample_rate) =
         load_codec(&args, dtype, &device, lm_state.config.num_codebooks)?;
     let dt = start_load.elapsed();
-    println!("Models loaded in {:.2}s", dt.as_secs_f64());
+    info!("Models loaded in {:.2}s", dt.as_secs_f64());
 
     let state = Arc::new(AppState {
         lm: Arc::new(lm_state),

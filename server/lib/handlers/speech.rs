@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::Mutex;
+use tracing::{debug, info};
 
 // Blocking token generation
 pub async fn server_lm_generate_blocking(
@@ -39,7 +40,7 @@ pub async fn server_lm_generate_blocking(
     // It's the caller's responsibility to do final clear
     model.clear_slow_caches_until(n_conditioning_tokens)?;
     if tokens.dim(D::Minus1)? == state.lm.max_new_tokens {
-        println!("Failed generation suspected. Rerolling once");
+        info!("Failed generation suspected. Rerolling once");
         let (new_tokens, new_hidden_states) = generate_blocking_with_hidden(
             &mut model,
             &encoded_input,
@@ -97,7 +98,7 @@ pub async fn vocode_semantic_tokens(
 ) -> anyhow::Result<Tensor> {
     let vocoder_start = Instant::now();
     let (_, seqlen) = semantic_tokens.dims2()?;
-    println!("Shape: {:?}, seqlen: {}", semantic_tokens.shape(), seqlen);
+    debug!("Shape: {:?}, seqlen: {}", semantic_tokens.shape(), seqlen);
     let tokens = match state.lm.model_type {
         WhichLM::DualAR => semantic_tokens.i((.., ..seqlen - 1))?,
         _ => semantic_tokens.clone(),
@@ -106,7 +107,7 @@ pub async fn vocode_semantic_tokens(
 
     let out = state.codec.decode_batch(&tokens).await?;
     let duration = vocoder_start.elapsed();
-    println!("Vocoding took: {} ms", duration.as_millis());
+    info!("Vocoding took: {} ms", duration.as_millis());
 
     let out = out.squeeze(0)?.squeeze(0)?;
     Ok(out)
@@ -141,7 +142,7 @@ async fn generate_speech_blocking(
         Some(batch_size) => {
             // Opt-in internal batching
             for (i, batch) in prompts.chunks(batch_size).enumerate() {
-                println!("Processing batch {} ({}) prompts", i, batch.len());
+                info!("Processing batch {} ({}) prompts", i, batch.len());
                 let pcm = generate_pcm_batched(state.clone(), batch)
                     .await?
                     .to_vec1::<f32>()?;
@@ -151,7 +152,7 @@ async fn generate_speech_blocking(
         None => {
             // Single batch
             for (i, prompt) in prompts.iter().enumerate() {
-                println!("Beginning chunk {} of {}", i, prompts.len());
+                info!("Beginning chunk {} of {}", i, prompts.len());
                 let pcm = generate_pcm_chunk(state.clone(), prompt, n_conditioning_tokens)
                     .await?
                     .to_vec1::<f32>()?;
@@ -160,11 +161,11 @@ async fn generate_speech_blocking(
         }
     }
     // Initial prefill
-    println!("Generation complete");
+    info!("Generation complete");
     let mut model = state.lm.model.lock().await;
     // Final cache eviction
     model.clear_slow_layer_caches();
-    println!("Final cache cleared");
+    info!("Final cache cleared");
 
     let mut audio_buf = Vec::new();
     write_pcm_as_wav(&mut audio_buf, &all_pcm, state.sample_rate)
@@ -195,7 +196,7 @@ async fn generate_speech_streaming(
 
     let stream = async_stream::stream! {
         for (i, prompt) in prompts.iter().enumerate() {
-            println!("Generating chunk {} of {}", i, prompts.len());
+            info!("Generating chunk {} of {}", i, prompts.len());
             match generate_pcm_chunk(stream_state.clone(), prompt, n_conditioning_tokens).await {
                 Ok(pcm_data) => {
                     if i == prompts.len() - 1 {
@@ -211,7 +212,7 @@ async fn generate_speech_streaming(
                         .to_vec1::<f32>()
                         .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("PCM generation failed: {}", e)))?;
                     let duration = resample_start.elapsed();
-                    println!("CPU resampling took: {:?}", duration);
+                    info!("CPU resampling took: {:?}", duration);
                     let mut encoder = encoder.lock().await;
                     match encoder.encode_pcm(&resampled_pcm) {
                         Ok(encoded) => {

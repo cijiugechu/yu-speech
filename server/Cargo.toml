@@ -58,6 +58,7 @@ tokio-util = "0.7"
 tower = "0.5"
 tower-http = { version = "0.6", features = ["cors"] }
 tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = { version = "5" }
 
 [dependencies.fish_speech_core]

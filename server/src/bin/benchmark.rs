@@ -6,8 +6,14 @@ use server::state::AppState;
 use server::utils::load::{load_codec, load_lm, Args};
 use std::sync::Arc;
 use std::time::Instant;
+use tracing::info;
+use tracing_subscriber::EnvFilter;
 
 async fn run_speech_test() -> anyhow::Result<()> {
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
+        .with_writer(std::io::stdout)
+        .try_init();
     let args = Args::parse();
 
     #[cfg(feature = "cuda")]
@@ -27,13 +33,13 @@ async fn run_speech_test() -> anyhow::Result<()> {
     #[cfg(not(feature = "cuda"))]
     let dtype = DType::F32;
 
-    println!("Loading {:?} model on {:?}", args.fish_version, device);
+    info!("Loading {:?} model on {:?}", args.fish_version, device);
     let start_load = Instant::now();
     let lm_state = load_lm(&args, checkpoint_dir, dtype, &device)?;
     let (codec_state, sample_rate) =
         load_codec(&args, dtype, &device, lm_state.config.num_codebooks)?;
     let dt = start_load.elapsed();
-    println!("Models loaded in {:.2}s", dt.as_secs_f64());
+    info!("Models loaded in {:.2}s", dt.as_secs_f64());
 
     let state = Arc::new(AppState {
         lm: Arc::new(lm_state),
@@ -53,12 +59,12 @@ async fn run_speech_test() -> anyhow::Result<()> {
         speaker_prompt: None,
     };
 
-    println!("Creating first request with batch_size=1");
+    info!("Creating first request with batch_size=1");
     let start = Instant::now();
 
-    println!("Running batch_size=1 request");
+    info!("Running batch_size=1 request");
     let _response1 = generate_speech(State(state.clone()), Json(request1)).await;
-    println!(
+    info!(
         "Native single batch completed in {:.2}s",
         start.elapsed().as_secs_f64()
     );
@@ -75,12 +81,12 @@ async fn run_speech_test() -> anyhow::Result<()> {
         speaker_prompt: None,
     };
 
-    println!("Creating first request with batch_size=1");
+    info!("Creating first request with batch_size=1");
     let start = Instant::now();
 
-    println!("Running batch_size=1 request");
+    info!("Running batch_size=1 request");
     let _response1_batched = generate_speech(State(state.clone()), Json(request1_batched)).await;
-    println!(
+    info!(
         "Batch size 1 completed in {:.2}s",
         start.elapsed().as_secs_f64()
     );
@@ -97,12 +103,12 @@ async fn run_speech_test() -> anyhow::Result<()> {
         speaker_prompt: None,
     };
 
-    println!("Creating second request with batch_size=4");
+    info!("Creating second request with batch_size=4");
     let start = Instant::now();
 
-    println!("Running batch_size=4 request");
+    info!("Running batch_size=4 request");
     let _response2 = generate_speech(State(state), Json(request2)).await;
-    println!(
+    info!(
         "Batch size 4 completed in {:.2}s",
         start.elapsed().as_secs_f64()
     );

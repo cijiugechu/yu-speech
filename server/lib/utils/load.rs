@@ -20,6 +20,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tokenizers::Tokenizer;
 use tokio::sync::Mutex;
+use tracing::info;
 
 #[derive(Parser)]
 pub struct Args {
@@ -112,7 +113,7 @@ pub fn load_lm(
         semantic_config.num_codebooks,
         lm_version.clone(),
     )?;
-    println!("Loaded {} voices", speakers.len());
+    info!("Loaded {} voices", speakers.len());
     let default_sampling_args = SamplingArgs {
         temp: args.temp,
         top_p: args.top_p,

@@ -3,6 +3,7 @@ use candle_core::{Result, Tensor};
 use fish_speech_core::codec::FireflyCodec;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tracing::debug;
 
 pub enum Codec {
     Mimi(Arc<Mutex<mimi::Tokenizer>>),
@@ -21,7 +22,7 @@ impl Codec {
                 };
                 let mut model = model_mutex.lock().await;
                 let out = model.encode_batch(audio);
-                println!("out: {:?}", out);
+                debug!("out: {:?}", out);
                 out
             }
             Codec::Firefly(state) => state.encode(&audio),

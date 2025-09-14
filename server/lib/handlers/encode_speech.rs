@@ -12,6 +12,7 @@ use fish_speech_core::audio::functional;
 use fish_speech_core::text::prompt::PromptEncoder;
 use std::sync::Arc;
 use std::time::Instant;
+use tracing::info;
 
 use std::io::{Read, Seek};
 use tempfile::NamedTempFile;
@@ -62,7 +63,7 @@ pub async fn encode_speaker(
     let start_encode = Instant::now();
     let encode_time = start_encode.elapsed().as_secs_f32();
     if let (Some(id), Some(prompt)) = (params.get("id"), params.get("prompt")) {
-        println!("Adding id: {}", id);
+        info!("Adding id: {}", id);
         let mut speaker_map = state.lm.voices.lock().await;
         let prompt_encoder = PromptEncoder::new(
             &state.lm.tokenizer,
@@ -81,8 +82,8 @@ pub async fn encode_speaker(
     let npy_bytes = tensor_to_npy_bytes(&result)?;
 
     let audio_duration = audio.dim(D::Minus1)? as f32 / state.sample_rate as f32;
-    println!("Encoding RTF: {:.1}x", audio_duration / encode_time);
-    println!(
+    info!("Encoding RTF: {:.1}x", audio_duration / encode_time);
+    info!(
         "Total RTF: {:.1}x",
         audio_duration / start_total.elapsed().as_secs_f32()
     );

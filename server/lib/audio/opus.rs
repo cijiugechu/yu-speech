@@ -1,6 +1,6 @@
 use anyhow::Result;
 use ogg::PacketWriter;
-use opus::{Application, Channels, Encoder};
+use opus2::{Application, Channels, Encoder};
 // use rubato::{FftFixedInOut, Resampler};
 
 pub struct OpusEncoder {
@@ -15,7 +15,7 @@ impl OpusEncoder {
         let mut encoder = Encoder::new(24000, Channels::Mono, Application::Voip)?;
 
         // Set bitrate to 24kbps (good for voice)
-        encoder.set_bitrate(opus::Bitrate::Bits(24000))?;
+        encoder.set_bitrate(opus2::Bitrate::Bits(24000))?;
 
         // Frame size is 20ms of audio at 24kHz
         let frame_size = 480; // 24000 * 0.02

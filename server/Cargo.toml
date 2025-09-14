@@ -43,7 +43,7 @@ moshi = { version = "0.5.2", optional = true }
 num = "0.4.3"
 num-traits = "0.2.19"
 ogg = { version = "0.9.1", features = ["tokio-util", "async"] }
-opus = "0.3.0"
+opus2 = "0.3"
 rand = "0.8.5"
 regex = "1.10.6"
 rustfft = "6.2.0"
@@ -58,7 +58,7 @@ tokio-util = "0.7.12"
 tower = "0.5.1"
 tower-http = { version = "0.6.2", features = ["cors"] }
 tracing = "0.1.40"
-zip = "2.2.1"
+zip = { version = "5.1" }
 
 [dependencies.fish_speech_core]
 path = "../fish_speech_core"

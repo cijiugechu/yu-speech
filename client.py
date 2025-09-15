@@ -10,7 +10,7 @@ client = OpenAI(
     base_url="http://localhost:3000/v1"
 )
 audio = client.audio.speech.create(
-    input="Hello world! This is a test, I just fixed the bug.",
+    input="Hello world！这里有全角感叹号，全角逗号",
     voice="wenhe-male",
     response_format="wav",
     model="tts-1",

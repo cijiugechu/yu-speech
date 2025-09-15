@@ -26,4 +26,5 @@ pub struct AppState {
     pub model_type: WhichModel,
     pub device: Device,
     pub sample_rate: u32,
+    pub voice_dir: std::path::PathBuf,
 }

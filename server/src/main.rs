@@ -65,6 +65,7 @@ async fn main() -> anyhow::Result<()> {
         device,
         model_type: args.fish_version,
         sample_rate,
+        voice_dir: args.voice_dir.clone(),
     });
 
     // Create router

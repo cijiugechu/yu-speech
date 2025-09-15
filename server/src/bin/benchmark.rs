@@ -49,6 +49,7 @@ async fn run_speech_test() -> anyhow::Result<()> {
         device,
         model_type: args.fish_version,
         sample_rate,
+        voice_dir: args.voice_dir.clone(),
     });
 
     // First request: batch_size = 1

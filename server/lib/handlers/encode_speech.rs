@@ -9,6 +9,9 @@ use candle_core::{D, Tensor};
 use fish_speech_core::audio as torchaudio;
 use fish_speech_core::audio::functional;
 use fish_speech_core::text::prompt::PromptEncoder;
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Instant;
 use tracing::info;
@@ -61,27 +64,65 @@ pub async fn encode_speaker(
 
     let start_encode = Instant::now();
     let encode_time = start_encode.elapsed().as_secs_f32();
-    if let (Some(id), Some(prompt)) = (params.get("id"), params.get("prompt")) {
-        info!("Adding id: {}", id);
-        let mut speaker_map = state.lm.voices.lock().await;
-        let prompt_encoder = PromptEncoder::new(
-            &state.lm.tokenizer,
-            &state.device,
-            state.lm.config.num_codebooks,
-            state.lm.model_type,
-        );
-        if speaker_map.contains_key(id) {
+    // Persist to voices dir if an id is provided (prompt is optional; empty string if missing)
+    if let Some(id) = params.get("id") {
+        let prompt_text = params.get("prompt").cloned().unwrap_or_default();
+
+        // Write tokens as U32 .npy to voice_dir/id.npy
+        let tokens_u32 = result.to_dtype(candle_core::DType::U32)?;
+        let voice_dir: PathBuf = state.voice_dir.clone();
+        fs::create_dir_all(&voice_dir)?;
+        let npy_path = voice_dir.join(format!("{}.npy", id));
+        // Do not overwrite existing file to avoid accidental clobbering
+        if npy_path.exists() {
             return Err(AppError::Message(format!(
-                "ID already exists on server: {}",
-                id
+                "Voice '{}' already exists on disk at {}",
+                id,
+                npy_path.display()
             )));
         }
-        let new_prompt = prompt_encoder
-            .encode_conditioning_prompt(prompt, &result.to_dtype(candle_core::DType::U32)?)?;
-        speaker_map.insert(id.to_owned(), new_prompt);
+        tokens_u32.write_npy(&npy_path)?;
+
+        // Update or create index.json with the prompt text
+        #[derive(Serialize, Deserialize, Default)]
+        struct SpeakerIndex {
+            speakers: std::collections::HashMap<String, String>,
+        }
+
+        let index_path = voice_dir.join("index.json");
+        let mut index: SpeakerIndex = if index_path.exists() {
+            let file = fs::File::open(&index_path)?;
+            serde_json::from_reader(file).unwrap_or_default()
+        } else {
+            SpeakerIndex::default()
+        };
+        index.speakers.insert(id.clone(), prompt_text.clone());
+        let file = fs::File::create(&index_path)?;
+        serde_json::to_writer_pretty(file, &index)?;
+
+        // Also populate in-memory map for immediate use (without restart)
+        {
+            let mut speaker_map = state.lm.voices.lock().await;
+            if speaker_map.contains_key(id) {
+                return Err(AppError::Message(format!(
+                    "ID already exists on server: {}",
+                    id
+                )));
+            }
+            let prompt_encoder = PromptEncoder::new(
+                &state.lm.tokenizer,
+                &state.device,
+                state.lm.config.num_codebooks,
+                state.lm.model_type,
+            );
+            let new_prompt =
+                prompt_encoder.encode_conditioning_prompt(&prompt_text, &tokens_u32)?;
+            speaker_map.insert(id.to_owned(), new_prompt);
+        }
     }
 
-    let npy_bytes = tensor_to_npy_bytes(&result)?;
+    // Return the U32 token npy bytes
+    let npy_bytes = tensor_to_npy_bytes(&result.to_dtype(candle_core::DType::U32)?)?;
 
     let audio_duration = audio.dim(D::Minus1)? as f32 / state.sample_rate as f32;
     info!("Encoding RTF: {:.1}x", audio_duration / encode_time);

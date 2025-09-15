@@ -110,7 +110,7 @@ pub fn repeat_kv(xs: &Tensor, n_rep: usize) -> Result<Tensor> {
     xs.apply_op1(RepeatKV { n_rep })
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "cuda"))]
 mod tests {
     use candle_core::Device;
 

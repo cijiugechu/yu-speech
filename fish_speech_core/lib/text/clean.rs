@@ -197,6 +197,17 @@ pub fn preprocess_text(text: &str) -> Vec<String> {
             continue;
         }
 
+        // Do not combine sentences across different scripts
+        if !current.is_empty() {
+            let script_current = detect_script(current.trim());
+            let script_next = detect_script(sentence.trim());
+            if script_current != script_next {
+                chunks.push(current.trim().to_string());
+                chunk_index += 1;
+                current.clear();
+            }
+        }
+
         // Try to combine short sentences up to current combine_threshold
         if !current.is_empty() && (current.chars().count() + sentence_chars > combine_threshold) {
             chunks.push(current.trim().to_string());

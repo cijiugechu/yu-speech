@@ -35,7 +35,7 @@ impl CustomOp1 for RepeatKV {
         l1: &Layout,
     ) -> Result<(candle_core::CudaStorage, candle_core::Shape)> {
         use candle_core::cuda_backend::cudarc::driver::{
-            CudaSlice, DeviceRepr, LaunchAsync, LaunchConfig,
+            CudaSlice, DeviceRepr, LaunchConfig, PushKernelArg, ValidAsZeroBits,
         };
         use candle_core::cuda_backend::{Map1, WrapErr, kernel_name};
         use candle_core::{CudaDevice, WithDType};
@@ -44,7 +44,7 @@ impl CustomOp1 for RepeatKV {
             n_repeats: usize,
         }
         impl Map1 for S {
-            fn f<T: DeviceRepr + WithDType + candle_core::cuda::cudarc::driver::ValidAsZeroBits>(
+            fn f<T: DeviceRepr + WithDType + ValidAsZeroBits>(
                 &self,
                 src: &CudaSlice<T>,
                 dev: &CudaDevice,
@@ -64,14 +64,30 @@ impl CustomOp1 for RepeatKV {
                     shared_mem_bytes: 0,
                 };
 
-                let func = dev
-                    .get_or_load_func(&kernel_name::<T>("repeat_kv"), candle_gqa_kernels::UNARY)?;
+                let func = dev.get_or_load_custom_func(
+                    &kernel_name::<T>("repeat_kv"),
+                    "gqa_unary",
+                    candle_gqa_kernels::UNARY,
+                )?;
                 // SAFETY: Set later by running the kernel.
-                let dst = unsafe { dev.alloc::<T>(output_el) }.w()?;
-                let params = (&src, &dst, n_local_heads, self.n_repeats, seqlen, head_dim);
+                let dst = unsafe { dev.alloc::<T>(output_el)? };
+
+                let n_local_heads_u32 = n_local_heads as u32;
+                let n_repeats_u32 = self.n_repeats as u32;
+                let seqlen_u32 = seqlen as u32;
+                let head_dim_u32 = head_dim as u32;
+
+                let mut builder = func.builder();
+                // Arguments must match the kernel signature in PTX
+                builder.arg(&src);
+                builder.arg(&dst);
+                builder.arg(&n_local_heads_u32);
+                builder.arg(&n_repeats_u32);
+                builder.arg(&seqlen_u32);
+                builder.arg(&head_dim_u32);
 
                 // SAFETY: ffi.
-                unsafe { func.launch(cfg, params) }.w()?;
+                unsafe { builder.launch(cfg) }.w()?;
                 Ok(dst)
             }
         }

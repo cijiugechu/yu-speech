@@ -7,14 +7,14 @@ use fish_speech_core::lm::sampling::SamplingArgs;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokenizers::Tokenizer;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 
 pub struct LMState {
     pub model: Arc<Mutex<DualARTransformer>>,
     pub model_type: WhichLM,
     pub config: Arc<BaseModelArgs>,
     pub tokenizer: Arc<Tokenizer>,
-    pub voices: Arc<Mutex<HashMap<String, Tensor>>>,
+    pub voices: Arc<RwLock<HashMap<String, Tensor>>>,
     pub default_voice: Arc<Tensor>,
     pub default_sampling_args: SamplingArgs,
     pub max_new_tokens: usize,

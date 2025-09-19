@@ -26,7 +26,7 @@ pub async fn generate_hidden_states(
     let voice_embedding = state
         .lm
         .voices
-        .lock()
+        .read()
         .await
         .get(&request.speaker_id)
         .unwrap_or(&state.lm.default_voice)

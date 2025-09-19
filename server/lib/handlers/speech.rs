@@ -262,7 +262,7 @@ pub async fn generate_speech(
             state
                 .lm
                 .voices
-                .lock()
+                .read()
                 .await
                 .get(&request.voice)
                 .unwrap_or(&state.lm.default_voice)

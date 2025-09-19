@@ -19,7 +19,7 @@ use hf_hub::api::sync::{Api, ApiRepo};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokenizers::Tokenizer;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 use tracing::info;
 
 #[derive(Parser)]
@@ -130,7 +130,7 @@ pub fn load_lm(
         model_type: lm_version,
         config: Arc::new(semantic_config),
         tokenizer,
-        voices: Arc::new(Mutex::new(speakers)),
+        voices: Arc::new(RwLock::new(speakers)),
         default_voice: Arc::new(default_speaker),
         default_sampling_args,
         // TODO Totally arbitrary value, make this configurable from CLI

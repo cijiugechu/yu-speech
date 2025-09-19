@@ -102,7 +102,7 @@ pub async fn encode_speaker(
 
         // Also populate in-memory map for immediate use (without restart)
         {
-            let mut speaker_map = state.lm.voices.lock().await;
+            let mut speaker_map = state.lm.voices.write().await;
             if speaker_map.contains_key(id) {
                 return Err(AppError::Message(format!(
                     "ID already exists on server: {}",

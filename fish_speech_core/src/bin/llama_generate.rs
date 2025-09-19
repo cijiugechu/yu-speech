@@ -67,10 +67,10 @@ fn generate_long(
 
     // TODO: use splitting code from the server
     let text_to_generate = prompt_encoder.encode_text("user", Some(&args.text))?;
-    println!("Text: {:?}", &args.text);
+    tracing::info!("Text: {:?}", &args.text);
     let assistant_preprompt = prompt_encoder.encode_vq(None)?;
 
-    println!(
+    tracing::info!(
         "Speaker conditioning size: {:?}",
         final_conditioning.shape()
     );
@@ -79,15 +79,15 @@ fn generate_long(
         D::Minus1,
     )?;
 
-    println!("Loaded prompt with shape {:?}", final_prompt.shape());
+    tracing::info!("Loaded prompt with shape {:?}", final_prompt.shape());
     // For debugging
     let speaker_tokens = final_prompt
         .i((0, ..))?
         .flatten_all()?
         .to_device(&Device::Cpu)?
         .to_vec1::<u32>()?;
-    println!("Input tokens:\n{:?}", &speaker_tokens);
-    println!(
+    tracing::info!("Input tokens:\n{:?}", &speaker_tokens);
+    tracing::info!(
         "Input prompt:\n{}",
         tokenizer.decode(&speaker_tokens, false).unwrap()
     );

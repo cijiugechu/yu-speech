@@ -75,7 +75,7 @@ impl<'a> Iterator for SingleBatchGenerator<'a> {
 
     fn next(&mut self) -> Option<Result<VQToken>> {
         if self.input_pos > self.max_new_tokens {
-            println!(
+            tracing::info!(
                 "Terminating early; input pos: {:?}, max: {:?}",
                 self.input_pos, self.max_new_tokens
             );
@@ -234,7 +234,7 @@ pub fn generate_blocking_with_hidden(
     ))??;
     let dt = start_pp.elapsed();
     if show_progress {
-        println!(
+        tracing::info!(
             "{:.2}ms prompt processing: {} tokens ({} new, {} cached, {:.2} tokens/s)",
             dt.as_secs_f64() * 1000.0,
             generator.input_pos,
@@ -291,7 +291,7 @@ pub fn generate_blocking_with_hidden(
             WhichLM::DualAR => 12.5,
             _ => 21.535,
         };
-        println!(
+        tracing::info!(
             "{} tokens generated in {:.3}s ({:.2} tokens/s, {:.3}ms / token, RTF: {:.3})",
             out_len,
             dt.as_secs_f64(),

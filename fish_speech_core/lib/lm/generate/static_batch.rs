@@ -293,9 +293,9 @@ pub fn generate_static_batch(
     let first_position: Vec<BatchPosition> = generator.next().ok_or(candle_core::Error::Msg(
         "Prefill mistakenly thought generation ended. Please check max tokens".into(),
     ))??;
-    println!("First position: {:?}", first_position);
+    tracing::info!("First position: {:?}", first_position);
     let dt = start_pp.elapsed();
-    println!(
+    tracing::info!(
         "{:.2}ms prompt processing: {} seqlen at bs={} ({:.2} tokens/s)",
         dt.as_secs_f64() * 1000.0,
         generator.input_pos,
@@ -318,7 +318,7 @@ pub fn generate_static_batch(
             .tick_chars("/|\\- "),
     );
     spinner.enable_steady_tick(Duration::from_millis(100));
-    println!("Sequences");
+    tracing::info!("Sequences");
 
     let start_decode = Instant::now();
     for (i, maybe_batch_pos) in generator.enumerate() {
@@ -336,7 +336,7 @@ pub fn generate_static_batch(
         spinner.inc(1);
         spinner.set_message(format!("Tokens: {}", i));
     }
-    println!("Generation done");
+    tracing::info!("Generation done");
     let dt = start_decode.elapsed();
     // this is fine since we ruled out bs=0 earlier
     // TODO Completely arbitrary unprincipled decision for debugging, remove this as soon as humanly possible
@@ -361,7 +361,7 @@ pub fn generate_static_batch(
         .into_iter()
         .map(|seq| {
             let tokens = Tensor::cat(&seq.tokens, D::Minus1)?;
-            println!("Shape: {:?}", tokens.shape());
+            tracing::info!("Shape: {:?}", tokens.shape());
             Ok((tokens, seq.is_audio_steps))
         })
         .collect::<Result<Vec<_>>>()?
@@ -377,7 +377,7 @@ pub fn generate_static_batch(
         WhichLM::DualAR => 12.5,
         _ => 21.535,
     };
-    println!(
+    tracing::info!(
         "{} tokens generated in {:.3}s ({:.2} tokens/s throughput, {:.3}ms / step, RTF: {:.3})",
         out_len,
         dt.as_secs_f64(),

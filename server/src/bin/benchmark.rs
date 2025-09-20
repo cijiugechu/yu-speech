@@ -4,9 +4,9 @@ use clap::Parser;
 use server::handlers::speech::{GenerateRequest, generate_speech};
 use server::state::AppState;
 use server::utils::load::{Args, load_codec, load_lm};
-use tokio::sync::Semaphore;
 use std::sync::Arc;
 use std::time::Instant;
+use tokio::sync::Semaphore;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
@@ -26,7 +26,10 @@ async fn run_speech_test() -> anyhow::Result<()> {
     #[cfg(not(any(feature = "cuda", feature = "metal")))]
     let device = Device::Cpu;
 
-    let checkpoint_dir = args.checkpoint.as_ref().map(|dir| dir.canonicalize().unwrap());
+    let checkpoint_dir = args
+        .checkpoint
+        .as_ref()
+        .map(|dir| dir.canonicalize().unwrap());
 
     #[cfg(feature = "cuda")]
     let dtype = DType::BF16;

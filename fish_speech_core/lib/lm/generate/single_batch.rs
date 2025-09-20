@@ -77,7 +77,8 @@ impl<'a> Iterator for SingleBatchGenerator<'a> {
         if self.input_pos > self.max_new_tokens {
             tracing::info!(
                 "Terminating early; input pos: {:?}, max: {:?}",
-                self.input_pos, self.max_new_tokens
+                self.input_pos,
+                self.max_new_tokens
             );
             return None;
         }

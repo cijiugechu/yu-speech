@@ -36,16 +36,14 @@ pub fn load_speaker_prompts(
             let entry = entry?;
             let path = entry.path();
             if path.extension().map(|e| e == "npy").unwrap_or(false)
-                && let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
-                    discovered.push(stem.to_string());
-                }
+                && let Some(stem) = path.file_stem().and_then(|s| s.to_str())
+            {
+                discovered.push(stem.to_string());
+            }
         }
     }
     for name in &discovered {
-        index
-            .speakers
-            .entry(name.clone())
-            .or_default();
+        index.speakers.entry(name.clone()).or_default();
     }
 
     // Build prompts
@@ -81,9 +79,10 @@ pub fn load_speaker_prompts(
 
     // Write back index.json to include discovered entries
     if (!index_path.exists() || !discovered.is_empty())
-        && let Ok(file) = std::fs::File::create(&index_path) {
-            let _ = serde_json::to_writer_pretty(file, &index);
-        }
+        && let Ok(file) = std::fs::File::create(&index_path)
+    {
+        let _ = serde_json::to_writer_pretty(file, &index);
+    }
 
     Ok((speakers, default_prompt))
 }

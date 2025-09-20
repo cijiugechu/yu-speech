@@ -147,7 +147,9 @@ pub fn preprocess_text(text: &str) -> Vec<String> {
     let (combine_threshold, split_threshold) = get_thresholds(&script);
     tracing::info!(
         "Processing text with script {:?}, initial thresholds: combine={}, split={}",
-        script, combine_threshold, split_threshold
+        script,
+        combine_threshold,
+        split_threshold
     );
 
     // Always output first sentence ASAP for TTFT
@@ -228,10 +230,7 @@ pub fn preprocess_text(text: &str) -> Vec<String> {
         chunks.push(current.trim().to_string());
     }
 
-    tracing::info!(
-        "Split into {} chunks with progressive sizing",
-        chunks.len()
-    );
+    tracing::info!("Split into {} chunks with progressive sizing", chunks.len());
     tracing::info!("Chunks:\n{:?}", chunks);
     chunks
 }

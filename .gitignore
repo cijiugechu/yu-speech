@@ -14,3 +14,4 @@ voices*
 *.pth
 .ipynb_checkpoints
 silence_dataset
+temp_*.wav

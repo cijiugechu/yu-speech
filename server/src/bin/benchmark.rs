@@ -4,6 +4,7 @@ use clap::Parser;
 use server::handlers::speech::{GenerateRequest, generate_speech};
 use server::state::AppState;
 use server::utils::load::{Args, load_codec, load_lm};
+use tokio::sync::Semaphore;
 use std::sync::Arc;
 use std::time::Instant;
 use tracing::info;
@@ -50,6 +51,7 @@ async fn run_speech_test() -> anyhow::Result<()> {
         model_type: args.fish_version,
         sample_rate,
         voice_dir: args.voice_dir.clone(),
+        concurrency: Arc::new(Semaphore::new(1)),
     });
 
     // First request: batch_size = 1

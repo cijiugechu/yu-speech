@@ -41,6 +41,13 @@ pub async fn encode_speaker(
     Query(params): Query<std::collections::HashMap<String, String>>,
     mut multipart: Multipart,
 ) -> Result<Response, AppError> {
+    // Serialize GPU-bound work during speaker encoding too
+    let _permit = state
+        .concurrency
+        .clone()
+        .acquire_owned()
+        .await
+        .map_err(|e| AppError::Message(format!("semaphore closed: {e}")))?;
     let start_total = Instant::now();
 
     let field = multipart

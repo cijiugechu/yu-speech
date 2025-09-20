@@ -13,7 +13,7 @@ use fish_speech_core::text::{clean::preprocess_text, prompt::PromptEncoder};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::time::Instant;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, OwnedSemaphorePermit};
 use tracing::{debug, info};
 
 // Blocking token generation
@@ -135,6 +135,7 @@ async fn generate_speech_blocking(
     prompts: (usize, Vec<Tensor>),
     maybe_bsz: Option<usize>,
 ) -> Result<Response<Body>, AppError> {
+    // GPU work is serialized at the request level; no acquisition here
     let mut all_pcm = Vec::new();
     let (n_conditioning_tokens, prompts) = prompts;
 
@@ -181,7 +182,9 @@ async fn generate_speech_blocking(
 async fn generate_speech_streaming(
     state: Arc<AppState>,
     prompts: (usize, Vec<Tensor>),
+    permit: OwnedSemaphorePermit,
 ) -> Result<Response<Body>, AppError> {
+    // GPU work is serialized by the passed-in permit held for the stream
     let src_rate: u32 = state.sample_rate;
     const DST_RATE: u32 = 24000;
     let (n_conditioning_tokens, prompts) = prompts;
@@ -193,8 +196,11 @@ async fn generate_speech_streaming(
 
     // Create a single clone of everything the stream will need
     let stream_state = state.clone();
+    // Move the permit into the stream to keep it alive for its entire lifetime
+    let guard = permit;
 
     let stream = async_stream::stream! {
+        let _permit = guard;
         for (i, prompt) in prompts.iter().enumerate() {
             info!("Generating chunk {} of {}", i, prompts.len());
             match generate_pcm_chunk(stream_state.clone(), prompt, n_conditioning_tokens).await {
@@ -256,6 +262,13 @@ pub async fn generate_speech(
     State(state): State<Arc<AppState>>,
     Json(request): Json<GenerateRequest>,
 ) -> Result<Response<Body>, AppError> {
+    // Acquire once to serialize all GPU touches (prompt encoding + generation)
+    let permit = state
+        .concurrency
+        .clone()
+        .acquire_owned()
+        .await
+        .map_err(|e| AppError::Message(format!("semaphore closed: {e}")))?;
     let voice_embedding = match &*request.voice {
         "unconditioned" => None,
         _ => Some(
@@ -273,6 +286,7 @@ pub async fn generate_speech(
     let state = state.clone();
     let num_codebooks = state.lm.config.num_codebooks;
     let chunks = preprocess_text(&request.input);
+    // Prompt encoding creates device tensors; runs under the same permit
     let prompt_encoder = PromptEncoder::new(
         &state.lm.tokenizer,
         &state.device,
@@ -291,8 +305,9 @@ pub async fn generate_speech(
     let prompts = prompt_encoder.encode_sequence(chunks, sysprompt_text, voice_embedding, true)?;
 
     if request.response_format == Some("opus".into()) {
-        generate_speech_streaming(state, prompts).await
+        generate_speech_streaming(state, prompts, permit).await
     } else {
+        let _permit = permit; // keep alive for the blocking path
         generate_speech_blocking(state, prompts, request.batch_size).await
     }
 }

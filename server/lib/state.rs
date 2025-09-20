@@ -7,7 +7,7 @@ use fish_speech_core::lm::sampling::SamplingArgs;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokenizers::Tokenizer;
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock, Semaphore};
 
 pub struct LMState {
     pub model: Arc<Mutex<DualARTransformer>>,
@@ -27,4 +27,6 @@ pub struct AppState {
     pub device: Device,
     pub sample_rate: u32,
     pub voice_dir: std::path::PathBuf,
+    /// Limit concurrent GPU work (Metal backend is not re-entrant across threads)
+    pub concurrency: Arc<Semaphore>,
 }

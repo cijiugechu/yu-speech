@@ -15,6 +15,7 @@ use server::state::AppState;
 use server::utils::load::{Args, load_codec, load_lm};
 use std::sync::Arc;
 use std::time::Instant;
+use tokio::sync::Semaphore;
 // Re-export the key types
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
@@ -66,6 +67,7 @@ async fn main() -> anyhow::Result<()> {
         model_type: args.fish_version,
         sample_rate,
         voice_dir: args.voice_dir.clone(),
+        concurrency: Arc::new(Semaphore::new(1)),
     });
 
     // Create router

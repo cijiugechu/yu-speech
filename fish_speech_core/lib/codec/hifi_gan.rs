@@ -19,7 +19,7 @@ impl ResBlock1 {
         vb: &VarBuilder,
         channels: usize,
         kernel_size: usize,
-        dilation: &Vec<usize>,
+        dilation: &[usize],
         model: &WhichFishVersion,
     ) -> Result<Self> {
         let mut convs1: Vec<FishConvNet> = vec![];
@@ -93,8 +93,8 @@ impl ParallelBlock {
     pub fn load(
         vb: &VarBuilder,
         channels: usize,
-        kernel_sizes: &Vec<usize>,
-        dilation_sizes: &Vec<Vec<usize>>,
+        kernel_sizes: &[usize],
+        dilation_sizes: &[Vec<usize>],
         model: &WhichFishVersion,
     ) -> Result<Self> {
         let blocks: Result<Vec<ResBlock1>> = kernel_sizes

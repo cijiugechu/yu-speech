@@ -26,10 +26,7 @@ async fn run_speech_test() -> anyhow::Result<()> {
     #[cfg(not(any(feature = "cuda", feature = "metal")))]
     let device = Device::Cpu;
 
-    let checkpoint_dir = match args.checkpoint.as_ref() {
-        Some(dir) => Some(dir.canonicalize().unwrap()),
-        _ => None,
-    };
+    let checkpoint_dir = args.checkpoint.as_ref().map(|dir| dir.canonicalize().unwrap());
 
     #[cfg(feature = "cuda")]
     let dtype = DType::BF16;

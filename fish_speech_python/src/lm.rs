@@ -56,10 +56,10 @@ impl LM {
             .map_err(|_| PyException::new_err("Failed to load tokenizer"))?;
 
         let lm_type = WhichLM::from_model(model_type);
-        let token_config = TokenConfig::new(lm_type.clone(), &tokenizer, &cfg)
+        let token_config = TokenConfig::new(lm_type, &tokenizer, &cfg)
             .map_err(|e| PyException::new_err(format!("Failed to create token config: {}", e)))?;
         let model =
-            DualARTransformer::load(&vb, &cfg, &token_config, lm_type.clone()).map_err(wrap_err)?;
+            DualARTransformer::load(&vb, &cfg, &token_config, lm_type).map_err(wrap_err)?;
 
         Ok(Self {
             model,
@@ -104,7 +104,7 @@ impl LM {
             &self.tokenizer,
             &self.device,
             self.cfg.num_codebooks,
-            self.model.model_type.clone(),
+            self.model.model_type,
         );
 
         // TODO: Implement voice encoding logic
@@ -149,7 +149,7 @@ impl LM {
             &self.tokenizer,
             &self.device,
             self.model.cfg.num_codebooks,
-            self.model.model_type.clone(),
+            self.model.model_type,
         );
         if input.is_empty() {
             return Err(PyException::new_err("input is empty"));
@@ -160,15 +160,11 @@ impl LM {
             // Extract "text" as a String
             let text: String = sample
                 .get_item("text")?
-                .ok_or(PyException::new_err(format!(
-                    "Missing 'text' field in sample"
-                )))?
+                .ok_or(PyException::new_err("Missing 'text' field in sample".to_string()))?
                 .extract()?;
             let audio: numpy::PyReadonlyArray3<u32> = sample
                 .get_item("codes")?
-                .ok_or(PyException::new_err(format!(
-                    "Missing 'codes' field in sample (encoded audio only)"
-                )))?
+                .ok_or(PyException::new_err("Missing 'codes' field in sample (encoded audio only)".to_string()))?
                 .extract()?;
             let codes = audio.as_array();
             let codes_shape = codes.shape().to_vec();
@@ -176,7 +172,7 @@ impl LM {
                 .to_slice()
                 .ok_or(PyException::new_err("input data is not contiguous"))?;
             let codes_tensor =
-                Tensor::from_slice(&codes, codes_shape, &self.device).map_err(wrap_err)?;
+                Tensor::from_slice(codes, codes_shape, &self.device).map_err(wrap_err)?;
             let codes_tensor = if codes_tensor.rank() == 3 {
                 codes_tensor.squeeze(0).map_err(wrap_err)?
             } else {

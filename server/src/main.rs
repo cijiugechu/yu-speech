@@ -45,11 +45,8 @@ async fn main() -> anyhow::Result<()> {
         .checkpoint
         .as_ref()
         .map(|raw_dir| raw_dir.canonicalize().unwrap());
-    // TODO: Figure out why BF16 is breaking on Metal
-    #[cfg(feature = "cuda")]
+
     let dtype = DType::BF16;
-    #[cfg(not(feature = "cuda"))]
-    let dtype = DType::F32;
 
     info!("Loading {:?} model on {:?}", args.fish_version, device);
     let start_load = Instant::now();

@@ -326,8 +326,14 @@ impl Attention {
         // Length changes after pulling
         let kv_seqlen = key_states.dim(2)?;
         let n_rep = self.n_head / self.n_local_heads;
-        // TODO: Write Metal kernel equivalent
-        #[cfg(not(feature = "cuda"))]
+        // Metal fast-path: avoid broadcast-expand by materializing with cat then reshape
+        #[cfg(all(feature = "metal", not(feature = "cuda")))]
+        let key_states = {
+            let cat = Tensor::cat(&vec![&key_states; n_rep], 2)?;
+            cat.reshape((bsz, self.n_local_heads * n_rep, kv_seqlen, self.head_dim))?
+        };
+        // CPU/other backends
+        #[cfg(all(not(feature = "cuda"), not(feature = "metal")))]
         let key_states = key_states
             .unsqueeze(2)?
             .expand((bsz, self.n_local_heads, n_rep, kv_seqlen, self.head_dim))?
@@ -342,7 +348,14 @@ impl Attention {
                 .reshape((bsz, self.n_local_heads * n_rep, kv_seqlen, self.head_dim))?,
         };
 
-        #[cfg(not(feature = "cuda"))]
+        // Metal fast-path: avoid broadcast-expand by materializing with cat then reshape
+        #[cfg(all(feature = "metal", not(feature = "cuda")))]
+        let value_states = {
+            let cat = Tensor::cat(&vec![&value_states; n_rep], 2)?;
+            cat.reshape((bsz, self.n_local_heads * n_rep, kv_seqlen, self.head_dim))?
+        };
+        // CPU/other backends
+        #[cfg(all(not(feature = "cuda"), not(feature = "metal")))]
         let value_states = value_states
             .unsqueeze(2)?
             .expand((bsz, self.n_local_heads, n_rep, kv_seqlen, self.head_dim))?

@@ -9,6 +9,7 @@ pub struct FSQConfig {
 }
 
 #[derive(Debug, Clone)]
+#[allow(clippy::upper_case_acronyms)]
 pub struct FSQ {
     levels: Tensor,
     basis: Tensor,

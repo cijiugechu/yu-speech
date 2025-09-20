@@ -325,7 +325,7 @@ pub fn generate_static_batch(
         let vq_token = maybe_batch_pos?;
         // let mut items: Vec<String> = Vec::with_capacity(sequences.len());
         for (seq, pos) in sequences.iter_mut().zip(vq_token.into_iter()) {
-            if !(audio_only && !pos.is_active) {
+            if !audio_only || pos.is_active {
                 seq.tokens.push(pos.codes);
                 seq.is_audio_steps.push(pos.is_audio);
                 // items.push(format!("{} on,  ", j));

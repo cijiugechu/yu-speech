@@ -103,9 +103,9 @@ Make a POST request to the `/v1/audio/encoding` endpoint, with:
 Example with curl:
 
 ```bash
-curl -X POST "http://localhost:3000/v1/audio/encoding?id=alice&prompt=Hello%20world" \
-  -F "file=@fake.wav" \
-  --output alice.npy
+curl -X POST "http://localhost:3000/v1/audio/encoding?id=dragon&prompt=In%20the%20ancient%20land%20of%20Eldoria%2C%20where%20skies%20shimmered%20and%20forests%2C%20whispered%20secrets%20to%20the%20wind%2C%20lived%20a%20dragon%20named%20Zephyros." \
+  -F "file=@dragon.wav" \
+  --output dragon.npy
 ```
 
 You can check that your voice was added by hitting the `/v1/voices` debug endpoint:

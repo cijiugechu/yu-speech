@@ -11,7 +11,7 @@ client = OpenAI(
 )
 audio = client.audio.speech.create(
     input="Hello world！这里有全角感叹号，全角逗号",
-    voice="wenhe-male",
+    voice="dragon",
     response_format="wav",
     model="tts-1",
 )

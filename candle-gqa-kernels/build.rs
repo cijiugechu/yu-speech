@@ -11,7 +11,6 @@ fn main() {
 
     if target_os == "macos" {
         // No CUDA on macOS: static src/lib.rs provides an empty UNARY.
-        println!("cargo:warning=CUDA kernels are stubbed on macOS; this crate will be a no-op.");
         return;
     }
 

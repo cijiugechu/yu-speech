@@ -1,6 +1,6 @@
-# fish-speech.rs
+# `yu-speech`
 
-<img src="docs/fish_hero.png" alt="Fish Speech.rs" width="512" />
+> This project is a fork of [fish-speech.rs](https://github.com/EndlessReform/fish-speech.rs)
 
 A simple, fast text-to-speech inference server for [Fish Speech](https://github.com/fishaudio/fish-speech) 1.5 and below, written in pure Rust.
 

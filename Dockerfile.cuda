@@ -1,0 +1,63 @@
+# syntax=docker/dockerfile:1.6
+
+FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 AS build
+
+ARG RUST_VERSION=1.79.0
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true \
+    DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        clang \
+        cmake \
+        curl \
+        git \
+        libclang-dev \
+        libssl-dev \
+        pkg-config \
+        python3 \
+        python3-pip \
+        unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION}
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+WORKDIR /workspace
+
+COPY Cargo.toml Cargo.lock ./
+COPY candle-gqa-kernels ./candle-gqa-kernels
+COPY fish_speech_core ./fish_speech_core
+COPY fish_speech_python ./fish_speech_python
+COPY server ./server
+COPY configs ./configs
+COPY voices-template ./voices-template
+
+RUN cargo fetch --locked
+RUN cargo build --release --locked --bin server --features cuda
+
+FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04 AS runtime
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    RUST_LOG=info
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=build /workspace/target/release/server ./server
+COPY --from=build /workspace/configs ./configs
+COPY --from=build /workspace/voices-template ./voices
+
+VOLUME ["/app/checkpoints", "/app/voices"]
+
+EXPOSE 3000
+
+ENTRYPOINT ["/app/server"]
+CMD ["--voice-dir", "/app/voices"]

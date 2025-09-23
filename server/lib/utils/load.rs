@@ -46,6 +46,10 @@ pub struct Args {
     /// Top-p (nucleus) sampling threshold
     #[arg(long, default_value = "0.8")]
     pub top_p: f64,
+
+    /// Run a warmup inference before accepting requests
+    #[arg(long, default_value = "false")]
+    pub warmup: bool,
 }
 
 pub fn get_model_repo(model_type: WhichModel) -> anyhow::Result<ApiRepo> {

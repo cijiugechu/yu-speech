@@ -130,7 +130,7 @@ impl GroupedResidualFSQ {
         let dim = config.dim;
         let groups = config.groups;
         assert!(
-            dim % groups == 0,
+            dim.is_multiple_of(groups),
             "Dimension must be divisible by the number of groups"
         );
         let dim_per_group = dim / groups;

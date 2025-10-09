@@ -78,7 +78,7 @@ impl LM {
         top_p: f64,
         top_k: usize,
         repetition_penalty: f32,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         self.model.clear_slow_layer_caches();
 
         let py = input.py();
@@ -120,7 +120,7 @@ impl LM {
         };
         for prompt in prompts {
             let x = py
-                .allow_threads(|| {
+                .detach(|| {
                     generate_blocking(&mut self.model, &prompt, 1024, &sampling_args, false)
                 })
                 .w()?;
@@ -143,7 +143,7 @@ impl LM {
         Ok(codes.into_any().unbind())
     }
 
-    fn create_speaker_prompt(&self, input: Vec<Bound<'_, PyDict>>) -> PyResult<PyObject> {
+    fn create_speaker_prompt(&self, input: Vec<Bound<'_, PyDict>>) -> PyResult<Py<PyAny>> {
         let prompt_encoder = PromptEncoder::new(
             &self.tokenizer,
             &self.device,

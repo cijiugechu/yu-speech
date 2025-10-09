@@ -70,7 +70,7 @@ impl FireflyCodec {
         self.model.cfg.spec_transform.sample_rate as u32
     }
 
-    fn encode(&self, pcm_data: numpy::PyReadonlyArray3<f32>) -> PyResult<PyObject> {
+    fn encode(&self, pcm_data: numpy::PyReadonlyArray3<f32>) -> PyResult<Py<PyAny>> {
         let py = pcm_data.py();
         let pcm_data = pcm_data.as_array();
         let pcm_shape = pcm_data.shape().to_vec();
@@ -80,7 +80,7 @@ impl FireflyCodec {
         }
         .map_err(wrap_err)?;
         let codes = py
-            .allow_threads(|| {
+            .detach(|| {
                 let pcm_data = candle_core::Tensor::from_slice(pcm_data, pcm_shape, &self.device)?
                     .to_dtype(self.dtype)?;
                 let codes = self.model.encode(&pcm_data)?.to_dtype(DType::U32)?;
@@ -91,7 +91,7 @@ impl FireflyCodec {
         Ok(codes.into_any().unbind())
     }
 
-    fn decode(&mut self, codes: numpy::PyReadonlyArray3<u32>, py: Python) -> PyResult<PyObject> {
+    fn decode(&mut self, codes: numpy::PyReadonlyArray3<u32>, py: Python) -> PyResult<Py<PyAny>> {
         let codes = codes.as_array();
         let codes_shape = codes.shape().to_vec();
         let codes = match codes.to_slice() {
@@ -100,7 +100,7 @@ impl FireflyCodec {
         }
         .map_err(wrap_err)?;
         let pcm = py
-            .allow_threads(|| {
+            .detach(|| {
                 let codes = candle_core::Tensor::from_slice(codes, codes_shape, &self.device)?;
                 let pcm = self
                     .model

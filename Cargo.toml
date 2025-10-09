@@ -36,10 +36,10 @@ indicatif = "0.17.8"
 moshi = "0.5.2"
 num = "0.4"
 num-traits = "0.2"
-numpy = "0.23.0"
+numpy = "0.26"
 ogg = { version = "0.9.1", features = ["tokio-util", "async"] }
 opus2 = {version = "0.3.2", features = ["bundled"]}
-pyo3 = "0.23.0"
+pyo3 = "0.26"
 rand = "0.8"
 rayon = "1.10.0"
 regex = "1.10"

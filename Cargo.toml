@@ -5,7 +5,7 @@ members = [
     "fish_speech_python",
     "server",
 ]
-resolver = "2"
+resolver = "3"
 package.version = "0.3.0"
 package.edition = "2024"
 

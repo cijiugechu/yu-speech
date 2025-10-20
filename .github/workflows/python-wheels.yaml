@@ -38,7 +38,7 @@ jobs:
               with:
                   python-version: "3.9"
             - uses: Jimver/cuda-toolkit@v0.2.23
-                with:
+              with:
                   cuda: '12.4.0'
                   use-github-cache: false
                   use-local-cache: true
